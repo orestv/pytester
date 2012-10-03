@@ -1,13 +1,15 @@
 import web
 import model
+import test
 
 render = web.template.render('templates/')
 urls = (
 		'/', 'login',
 		'/dashboard', 'Dashboard',
-		'/loginHandler', 'LoginHandler'
+		'/loginHandler', 'LoginHandler',
+		'/test', test.app_test
 	)
-app = web.application(urls, globals())
+app = web.application(urls, locals())
 
 if web.config.get('_session') is None:
 	session = web.session.Session(app, web.session.DiskStore('sessions'), {'student_id': -1})
@@ -29,7 +31,8 @@ class Dashboard:
 		student_id = int(session['student_id'])
 		student_info = model.get_student_info(student_id)
 		attempts = model.get_student_test_attempts(student_id)
-		return render.dashboard(student_id, student_info['firstname'], student_info['lastname'], attempts)
+		tests = model.get_student_available_tests(student_id)
+		return render.dashboard(student_info, attempts, tests)
 
 class login:
 	def GET(self):

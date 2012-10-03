@@ -1,25 +1,49 @@
-$def with(student_id, firstname, lastname, attempts)
+$def with(student, attempts, tests)
 <html>
 <head>
 	<title>Домашня сторінка</title>
 	<link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-Вітаємо, $firstname
-<br/>
-
-<table>
-	<tr>
-		<th>Назва</th>
-		<th>Початок</th>
-		<th>Кінець</th>
-	</tr>
-	$for attempt in attempts:
+<h1>Вітаємо, $student['firstname']</h1>
+<div class="dashboardBlock">
+	<h2>Доступні тести</h2>
+	<table>
 		<tr>
-			<td>$attempt['name']</td>
-			<td>$attempt['start']</td>
-			<td>$attempt['end']</td>
+			<th>Назва</th>
+			<th>Результат</th>
+			<th>Actions</th>
 		</tr>
-</table>
+		$for test in tests:
+			<tr>
+				<td>$test['name']</td>
+				<td>
+					$if test['result'] is None:
+						N/A
+					$else:
+						$int(test['result']) / $test['maxresult']
+				</td>
+				<td><a href="/test/start?test_id=$test['id']">Try</a></td>
+			</tr>
+	</table>
+</div>
+
+<div class="dashboardBlock">
+	<h2>Попередні спроби</h2>
+	<table>
+		<tr>
+			<th>Назва</th>
+			<th>Початок</th>
+			<th>Кінець</th>
+		</tr>
+		$for attempt in attempts:
+			<tr>
+				<td>$attempt['name']</td>
+				<td>$attempt['start']</td>
+				<td>$attempt['end']</td>
+			</tr>
+	</table>
+</div>
+
 </body>
 </html>
