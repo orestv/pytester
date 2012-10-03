@@ -1,9 +1,25 @@
-$def with(student_hash, firstname, lastname)
+$def with(student_id, firstname, lastname, attempts)
 <html>
 <head>
 	<title>Домашня сторінка</title>
+	<link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
 Вітаємо, $firstname
+<br/>
+
+<table>
+	<tr>
+		<th>Назва</th>
+		<th>Початок</th>
+		<th>Кінець</th>
+	</tr>
+	$for attempt in attempts:
+		<tr>
+			<td>$attempt['name']</td>
+			<td>$attempt['start']</td>
+			<td>$attempt['end']</td>
+		</tr>
+</table>
 </body>
 </html>

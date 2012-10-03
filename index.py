@@ -10,7 +10,7 @@ urls = (
 app = web.application(urls, globals())
 
 if web.config.get('_session') is None:
-	session = web.session.Session(app, web.session.DiskStore('sessions'), {'student_hash': 15})
+	session = web.session.Session(app, web.session.DiskStore('sessions'), {'student_id': -1})
 	web.config._session = session
 else:
 	session = web.config.get('_session')
@@ -20,23 +20,16 @@ class LoginHandler:
 		i = web.input(name=None)
 		firstname = i.firstname
 		lastname = i.lastname
-		student_hash = model.get_student_hash(firstname, lastname)['hash']
-		session.student_hash = student_hash
+		student_id = model.get_student(firstname, lastname)['id']
+		session.student_id = student_id
 		web.seeother('/dashboard')
 
 class Dashboard:
 	def GET(self):
-		if web.config.get('_session') is None:
-			print 'Sesion in web.config is none'
-			session = web.session.Session(app, web.session.DiskStore('sessions'), {'student_hash': 15})
-			print 'Created a new sesssion, ', session
-			web.config._session = session
-		else:
-			print 'session in web.config is not none: it is ', web.config.get('_session')
-			session = web.config.get('_session')
-		student_hash = session['student_hash']
-		student_info = model.get_student_info(student_hash)
-		return render.dashboard(student_hash, student_info['firstname'], student_info['lastname'])
+		student_id = int(session['student_id'])
+		student_info = model.get_student_info(student_id)
+		attempts = model.get_student_test_attempts(student_id)
+		return render.dashboard(student_id, student_info['firstname'], student_info['lastname'], attempts)
 
 class login:
 	def GET(self):
