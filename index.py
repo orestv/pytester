@@ -1,13 +1,16 @@
 import web
 import model
 import test
+import admin
+web.debug = True
 
 render = web.template.render('templates/')
 urls = (
 		'/', 'login',
 		'/dashboard', 'Dashboard',
 		'/loginHandler', 'LoginHandler',
-		'/test', test.app_test
+		'/test', test.app_test,
+		'/admin', admin.app_admin
 	)
 app = web.application(urls, locals())
 

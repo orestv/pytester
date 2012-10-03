@@ -7,9 +7,10 @@ urls = (
 	'/start', 'Start'
 )
 render = web.template.render('templates/')
+app_test = web.application(urls, locals())
 
 if web.config.get('_session') is None:
-	session = web.session.Session(app, web.session.DiskStore('sessions'), {'student_id': -1})
+	session = web.session.Session(app_test, web.session.DiskStore('sessions'), {'student_id': -1})
 	web.config._session = session
 else:
 	session = web.config.get('_session')
@@ -34,5 +35,3 @@ class Start:
 		student_id = session['student_id']
 		attempt_id = model.start_new_attempt(test_id, student_id)
 		raise web.seeother('/test?attempt_id=%s&test_id=%s'%(attempt_id, test_id))
-
-app_test = web.application(urls, locals())
