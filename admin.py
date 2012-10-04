@@ -2,35 +2,33 @@ import web
 import model
 
 urls = (
-	'/', 'Dashboard',
-	'/login', 'Login',
-	'/generateTest', 'GenerateTest'
+    '/', 'Dashboard',
+    '/login', 'Login',
+    '/generateTest', 'GenerateTest'
 )
 render = web.template.render('templates/')
-app_admin = web.application(urls, locals())
-if web.config.get('_session') is None:
-	session = web.session.Session(app_admin, web.session.DiskStore('sessions'), {})
-	web.config._session = session
-else:
-	session = web.config.get('_session')
+app = web.application(urls, locals())
 
 
 class Dashboard:
-	def GET(self):
-		return render.admin_dashboard()
+    def GET(self):
+        if not web.ctx.session['admin_logged_in']:
+            raise web.seeother('/login')
+        topics = model.get_topics()
+        return render.admin_dashboard(topics)
 
 class GenerateTest:
-	pass
+    pass
 
 class Login:
-	def POST(self):
-		i = web.input(name=None)
-		password = i.password
-		if password == 'HardTaught':
-			session['admin_logged_in'] = True
-			raise web.seeother('/')
-		else:
-			return render.admin()
+    def POST(self):
+        i = web.input(name=None)
+        password = i.password
+        if password == 'HardTaught':
+            web.ctx.session['admin_logged_in'] = True
+            raise web.seeother('/')
+        else:
+            return render.admin()
 
-	def GET(self):
-		return render.admin()
+    def GET(self):
+        return render.admin()

@@ -1,8 +1,21 @@
+$def with(topics)
 <html>
 <head>
 	<title>Admin Dashboard</title>
 </head>
 <body>
 	<h1>Admin Dashboard</h1>
+	<h2>Topics</h2>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Actions</th>
+		</tr>
+		$for topic in topics:
+			<tr>
+				<td>$topic['name']</td>
+				<td></td>
+			</tr>
+	</table>
 </body>
 </html>

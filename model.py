@@ -50,3 +50,8 @@ def get_questions_for_test(test_id, student_id):
         WHERE qs.test_id = %s AND (qs.student_id = %s OR ISNULL(qs.student_id) = 1)
         ORDER BY qsq.order ASC;''', (test_id, student_id))
     return c.fetchall()
+
+def get_topics():
+    c = get_cursor()
+    c.execute('''SELECT id, name FROM topic''')
+    return c.fetchall()
