@@ -40,16 +40,36 @@ def start_new_attempt(test_id, student_id):
     c.execute('''INSERT into test_attempt (test_id, student_id) values (%s, %s)''', (test_id, student_id))
     return c.lastrowid
 
-def get_questions_for_test(test_id, student_id):
+def get_questions_for_test(test_id, student_id, attempt_id):
     c = get_cursor()
-    c.execute('''SELECT q.id AS id, q.text AS text FROM question_sequence qs
+    c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id, 
+            a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected
+        FROM question_sequence qs
         INNER JOIN question_sequence_questions qsq
             ON qs.id = qsq.sequence_id
         INNER join question q
             ON qsq.question_id = q.id
+        INNER JOIN answer a
+            ON a.question_id = q.id
+        LEFT OUTER JOIN student_answer sa
+            ON sa.student_id = %s AND sa.test_attempt_id = %s AND sa.answer_id = a.id
         WHERE qs.test_id = %s AND (qs.student_id = %s OR ISNULL(qs.student_id) = 1)
-        ORDER BY qsq.order ASC;''', (test_id, student_id))
-    return c.fetchall()
+        ORDER BY qsq.order ASC;''', (student_id, attempt_id, test_id, student_id))
+    rows = c.fetchall()
+    result = {}
+
+    for row in rows:
+        id = row['id']
+        answer = {'id': row['ans_id'],
+                'text': row['ans_text'],
+                'selected': row['ans_selected']}
+        if id in result:
+            result[id]['answers'].append(answer)
+        else:
+            result[id] = {'text': row['text'],
+                        'multiselect': row['multiselect'],
+                        'answers': [answer]}
+    return result
 
 def get_topics():
     c = get_cursor()

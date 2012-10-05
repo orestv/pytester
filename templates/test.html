@@ -1,11 +1,29 @@
-$def with(questions, answers)
+$def with(test_name, questions)
 <html>
 	<head>
 		<title>Test</title>
 	</head>
 <body>
-	$for question in questions:
-		$question['text']
-		<br/>
+	<h1>Проходження тесту "$test_name"</h1>
+	<table>
+		<tr>
+			<th>Питання</th>
+			<th>Відповіді</th>
+		</tr>
+			$for id in questions:
+				$ question = questions[id]
+				$ type = 'checkbox' if question['multiselect'] else 'radio'
+				$ answered = filter(lambda ans : ans['selected'] == 1, question['answers'])
+				<tr>
+					<td style="width: 15cm">$question['text']</td>
+					<td>
+						$for ans in question['answers']:
+							$ name = '{0}_{1}'.format(id, ans['id'])
+							$ selected = 'selected' if ans['selected'] else ''
+							$ disabled = 'disabled' if answered else ''
+							<input type="$type" name="$name" $selected $disabled/> <label for="$name">$ans['text']</label><br/>
+					</td>
+				</tr>
+	</table>
 </body>
 </html>

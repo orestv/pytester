@@ -18,9 +18,8 @@ class Test:
 		attempt_id = i.attempt_id
 		test_id = i.test_id
 		student_id = web.ctx.session['student_id']
-		questions = model.get_questions_for_test(test_id, student_id)
-		# return test_id, student_id, attempt_id
-		return render.test(questions, None)
+		questions = model.get_questions_for_test(test_id, student_id, attempt_id)
+		return render.test('Test', questions)
 
 class Start:
 	def GET(self):
