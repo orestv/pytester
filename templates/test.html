@@ -1,29 +1,34 @@
-$def with(test_name, questions)
+$def with(test_name, attempt_id, questions)
 <html>
 	<head>
 		<title>Test</title>
 	</head>
+	<script src="/static/test.js"></script>
 <body>
 	<h1>Проходження тесту "$test_name"</h1>
-	<table>
-		<tr>
-			<th>Питання</th>
-			<th>Відповіді</th>
-		</tr>
-			$for id in questions:
-				$ question = questions[id]
-				$ type = 'checkbox' if question['multiselect'] else 'radio'
-				$ answered = filter(lambda ans : ans['selected'] == 1, question['answers'])
-				<tr>
-					<td style="width: 15cm">$question['text']</td>
-					<td>
-						$for ans in question['answers']:
-							$ name = '{0}_{1}'.format(id, ans['id'])
-							$ selected = 'selected' if ans['selected'] else ''
-							$ disabled = 'disabled' if answered else ''
-							<input type="$type" name="$name" $selected $disabled/> <label for="$name">$ans['text']</label><br/>
-					</td>
-				</tr>
-	</table>
+	<form action='handleResults' method="POST">
+		<input type="hidden" id="attemptId" value="$attempt_id"/>
+		<table>
+			<tr>
+				<th>Питання</th>
+				<th>Відповіді</th>
+			</tr>
+				$for id in questions:
+					$ question = questions[id]
+					$ type = 'checkbox' if question['multiselect'] else 'radio'
+					$ answered = filter(lambda ans : ans['selected'] == 1, question['answers'])
+					<tr>
+						<td style="width: 15cm">$question['text']</td>
+						<td>
+							$for ans in question['answers']:
+								$ name = id
+								$ value = ans['id']
+								$ checked = 'checked' if ans['selected'] else ''
+								$ disabled = 'disabled' if answered else ''
+								<input type="$type" name="$name" value="$value" $checked $disabled onchange="answerUpdated($id);"/> <label for="$name">$ans['text']</label><br/>
+						</td>
+					</tr>
+		</table>
+	</form>
 </body>
 </html>

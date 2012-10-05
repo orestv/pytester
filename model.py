@@ -42,7 +42,7 @@ def start_new_attempt(test_id, student_id):
 
 def get_questions_for_test(test_id, student_id, attempt_id):
     c = get_cursor()
-    c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id, 
+    c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,
             a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected
         FROM question_sequence qs
         INNER JOIN question_sequence_questions qsq
@@ -70,6 +70,17 @@ def get_questions_for_test(test_id, student_id, attempt_id):
                         'multiselect': row['multiselect'],
                         'answers': [answer]}
     return result
+
+def update_answers(student_id, attempt_id, question_id, answers):
+    c = get_cursor()
+    c.execute('''DELETE sa
+        FROM student_answer sa
+        INNER JOIN answer a ON sa.answer_id = a.id
+        WHERE a.question_id = %s AND sa.student_id = %s
+            AND sa.test_attempt_id = %s;''', (question_id, student_id, attempt_id))
+    for ans in answers:
+        c.execute('''INSERT INTO student_answer (student_id, test_attempt_id, answer_id)
+            VALUES (%s, %s, %s)''', (student_id, attempt_id, ans))
 
 def get_topics():
     c = get_cursor()

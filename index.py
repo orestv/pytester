@@ -19,7 +19,6 @@ if web.config.get('_session') is None:
 else:
     session = web.config.get('_session')
 def session_hook():
-    print 'hook has worked'
     web.ctx.session = session
 app.add_processor(web.loadhook(session_hook))
 

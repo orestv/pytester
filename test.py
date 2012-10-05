@@ -4,7 +4,8 @@ import model
 urls = (
 	'', 'retest',
 	'/test', 'Test',
-	'/start', 'Start'
+	'/start', 'Start',
+	'/answerHandler', 'HandleAnswer'
 )
 render = web.template.render('templates/')
 app = web.application(urls, locals())
@@ -19,7 +20,7 @@ class Test:
 		test_id = i.test_id
 		student_id = web.ctx.session['student_id']
 		questions = model.get_questions_for_test(test_id, student_id, attempt_id)
-		return render.test('Test', questions)
+		return render.test('Test', attempt_id, questions)
 
 class Start:
 	def GET(self):
@@ -28,3 +29,12 @@ class Start:
 		student_id = web.ctx.session['student_id']
 		attempt_id = model.start_new_attempt(test_id, student_id)
 		raise web.seeother('/test?attempt_id=%s&test_id=%s'%(attempt_id, test_id))
+
+class HandleAnswer:
+	def POST(self):
+		i = web.input(name=None)
+		attempt_id = i.attempt_id
+		question_id = i.question_id
+		answers = i.answers.strip(',').split(',')
+		model.update_answers(web.ctx.session['student_id'], attempt_id, question_id, answers)
+		pass
