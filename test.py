@@ -5,6 +5,7 @@ urls = (
 	'', 'retest',
 	'/test', 'Test',
 	'/start', 'Start',
+	'/continue', 'Continue',
 	'/answerHandler', 'HandleAnswer'
 )
 render = web.template.render('templates/')
@@ -28,6 +29,15 @@ class Start:
 		test_id = i.test_id
 		student_id = web.ctx.session['student_id']
 		attempt_id = model.start_new_attempt(test_id, student_id)
+		raise web.seeother('/test?attempt_id=%s&test_id=%s'%(attempt_id, test_id))
+
+class Continue:
+	def GET(self):
+		i = web.input(name=None)
+		attempt_id = i.attempt_id
+		test = model.get_test_for_attempt(attempt_id)
+		print test
+		test_id = test['id']
 		raise web.seeother('/test?attempt_id=%s&test_id=%s'%(attempt_id, test_id))
 
 class HandleAnswer:

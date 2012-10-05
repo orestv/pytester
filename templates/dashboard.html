@@ -35,12 +35,19 @@ $def with(student, attempts, tests)
 			<th>Назва</th>
 			<th>Початок</th>
 			<th>Кінець</th>
+			<th>Дії</th>
 		</tr>
 		$for attempt in attempts:
 			<tr>
 				<td>$attempt['name']</td>
 				<td>$attempt['start']</td>
 				<td>$attempt['end']</td>
+				<td>
+					$if not attempt['end']:
+						<a href="/test/continue?attempt_id=$attempt['id']">
+							Continue
+						</a>
+				</td>
 			</tr>
 	</table>
 </div>

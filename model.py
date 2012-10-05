@@ -16,10 +16,11 @@ def get_student_info(id):
 
 def get_student_test_attempts(id):
     c = get_cursor()
-    c.execute('''SELECT t.name, ta.start, ta.end
+    c.execute('''SELECT t.id, t.name, ta.start, ta.end
         FROM test_attempt ta
         INNER join test t ON ta.test_id = t.id
-        WHERE ta.student_id = %s''', (id))
+        WHERE ta.student_id = %s
+        ORDER BY ta.start DESC''', (id))
     return c.fetchall()
 
 def get_student_available_tests(id):
@@ -39,6 +40,11 @@ def start_new_attempt(test_id, student_id):
     c = get_cursor()
     c.execute('''INSERT into test_attempt (test_id, student_id) values (%s, %s)''', (test_id, student_id))
     return c.lastrowid
+
+def get_test_for_attempt(attempt_id):
+    c = get_cursor()
+    c.execute('''SELECT id FROM  test_attempt WHERE id = %s''', (attempt_id))
+    return c.fetchone()
 
 def get_questions_for_test(test_id, student_id, attempt_id):
     c = get_cursor()
