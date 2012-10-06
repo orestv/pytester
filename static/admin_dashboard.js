@@ -11,7 +11,7 @@ function btnAddTopic_clicked() {
 
 function reloadTopics() {
 	clearTopics()
-	$.getJSON('topics?rnd=' + Math.random(), loadTopics)
+	$.getJSON('/admin/topics?rnd=' + Math.random(), loadTopics)
 }
 function clearTopics() {
 	$('#tblTopics tr:gt(1)').remove()
@@ -25,7 +25,7 @@ function addTopicRow(topic) {
 	var tdName = $('<td>')
 	var tdQuestions = $('<td>').css('text-align', 'center').text(questionCount)
 	var tdActions = $('<td>')
-	var aQuestion = $('<a>').attr('href', 'questions?topic_id=' + id)
+	var aQuestion = $('<a>').attr('href', '/admin/questions?topic_id=' + id)
 							.text(name)
 	var btnDelete = $('<input>').attr('type', 'button')
 								.attr('value', 'Видалити')
@@ -73,7 +73,7 @@ function deleteTopic(id, name) {
 	if (!confirm('Ви впевнені, що бажаєте видалити тему \"' + name + '\"?'))
 		return
 	$.ajax({
-		url: 'topic',
+		url: '/admin/topic',
 		data: {action: 'delete', id: id},
 		type: 'POST',
 		success: reloadTopics
@@ -81,7 +81,7 @@ function deleteTopic(id, name) {
 }
 function addTopic(name) {
 	$.ajax({
-		url: 'topic',
+		url: '/admin/topic',
 		data: {action: 'add', name: name},
 		type: 'POST',
 		success: reloadTopics
@@ -89,7 +89,7 @@ function addTopic(name) {
 }
 function renameTopic(id, name) {
 	$.ajax({
-		url: 'topic',
+		url: '/admin/topic',
 		data: {action: 'rename', id: id, name: name},
 		type: 'POST',
 		success: reloadTopics

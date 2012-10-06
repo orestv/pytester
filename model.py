@@ -119,6 +119,11 @@ def detect_linebreaks(input):
     nl.sort(cmp_)
     return nl[0][1]
 
+def get_question(question_id):
+    c = get_cursor()
+    c.execute('''SELECT id, topic_id, text, comment, multiselect
+        FROM question WHERE id = %s''', (question_id))
+    return c.fetchone()
 def question_exists(topic_id, question_text):
     c = get_cursor()
     c.execute('''SELECT CASE WHEN EXISTS
@@ -130,6 +135,11 @@ def add_question(topic_id, text, comment, multiselect):
     c.execute('''INSERT INTO question (topic_id, text, comment, multiselect)
         VALUES (%s, %s, %s, %s);''', (topic_id, text, comment, multiselect))
     return c.lastrowid
+def delete_question(question_id):
+    c = get_cursor()
+    c.execute('''DELETE q, a FROM question q
+        INNER JOIN answer a ON q.id = a.question_id
+        WHERE q.id = %s''', (question_id))
 def add_answer(question_id, text, correct):
     c = get_cursor()
     c.execute('''INSERT INTO answer (question_id, text, correct)

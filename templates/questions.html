@@ -14,6 +14,7 @@ $def with(topic_id, topic_name, questions)
 		<tr>
 			<th>Питання</th>
 			<th>Відповіді</th>
+			<th>Дії</th>
 		</tr>
 			$for id in questions:
 				$ question = questions[id]
@@ -27,6 +28,7 @@ $def with(topic_id, topic_name, questions)
 							$ correct = "correct" if ans['correct'] else ''
 							<input type="$type" name="$name" value="$value"/> <span class="$correct" for="$name">$ans['text']</span><br/>
 					</td>
+					<td><a href="question?action=delete&question_id=$id">Delete</a></td>
 				</tr>
 		</table>
 </body>

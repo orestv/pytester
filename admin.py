@@ -10,6 +10,7 @@ urls = (
     '/topic', 'Topic',
     '/topics', 'Topics',
     '/questions', 'Questions',
+    '/question', 'Question',
     '/uploadQuestions', 'QuestionsUpload'
 )
 render = web.template.render('templates/')
@@ -58,6 +59,16 @@ class QuestionsUpload:
         topic_id = i['topic_id']
         model.upload_questions(topic_id, questions)
         raise web.seeother('/questions?topic_id=%(id)s' % {'id': topic_id})
+
+class Question:
+    def GET(self):
+        i = web.input()
+        question_id = i['question_id']
+        topic_id = model.get_question(question_id)['topic_id']
+        action = i.action
+        if action == 'delete':
+            model.delete_question(question_id)
+        raise web.seeother('questions?topic_id=%(id)s' % {'id': topic_id})
 
 class Topic:
     def POST(self):
