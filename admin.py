@@ -1,4 +1,4 @@
-import web, http
+import web
 import model
 import json
 
@@ -8,7 +8,8 @@ urls = (
     '/login', 'Login',
     '/generateTest', 'GenerateTest',
     '/topic', 'Topic',
-    '/topics', 'Topics'
+    '/topics', 'Topics',
+    '/questions', 'Questions'
 )
 render = web.template.render('templates/')
 app = web.application(urls, locals())
@@ -23,7 +24,6 @@ class Dashboard:
 class Topics:
     def GET(self):
         topics = model.get_topics()
-        http.expires(-1)
         return json.dumps(topics)
 
 class GenerateTest:
@@ -41,6 +41,14 @@ class Login:
 
     def GET(self):
         return render.admin()
+
+class Questions:
+    def GET(self):
+        i = web.input(name=None)
+        id = i.topic_id
+        name = model.get_topic(id)['name']
+        questions = model.get_questions_for_topic(id)
+        return render.questions(id, name, questions)
 
 class Topic:
     def POST(self):

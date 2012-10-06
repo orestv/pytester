@@ -2,6 +2,10 @@ table input[type=text] {
 	width: 100%;
 }
 
-#tblTopics {
+#dvTopics {
 	width: 50%;
+	text-align: center;
+}
+#tblTopics {
+	width: 100%;
 }

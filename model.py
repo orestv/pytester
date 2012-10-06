@@ -76,6 +76,27 @@ def get_questions_for_test(test_id, student_id, attempt_id):
                         'multiselect': row['multiselect'],
                         'answers': [answer]}
     return result
+def get_questions_for_topic(topic_id):
+    c = get_cursor()
+    c.execute('''SELECT q.id, q.text, q.multiselect,
+        a.id AS ans_id, a.text AS ans_text, correct
+        FROM question q
+        INNER JOIN answer a ON q.id = a.question_id
+        WHERE q.topic_id = %s;''', (topic_id))
+    rows = c.fetchall()
+    result = {}
+    for row in rows:
+        id = row['id']
+        answer = {'id': row['ans_id'],
+                'text': row['ans_text'],
+                'correct': row['correct']}
+        if id in result:
+            result[id]['answers'].append(answer)
+        else:
+            result[id] = {'text': row['text'],
+                        'multiselect': row['multiselect'],
+                        'answers': [answer]}
+    return result
 
 def update_answers(student_id, attempt_id, question_id, answers):
     c = get_cursor()
@@ -88,9 +109,17 @@ def update_answers(student_id, attempt_id, question_id, answers):
         c.execute('''INSERT INTO student_answer (student_id, test_attempt_id, answer_id)
             VALUES (%s, %s, %s)''', (student_id, attempt_id, ans))
 
+def get_topic(topic_id):
+    c = get_cursor()
+    c.execute('''SELECT id, name FROM topic WHERE id = %s''', (topic_id))
+    return c.fetchone()
 def get_topics():
     c = get_cursor()
-    c.execute('''SELECT id, name FROM topic ORDER BY name ASC;''')
+    c.execute('''SELECT t.id, t.name, COUNT(q.id) AS question_count
+        FROM topic t
+        LEFT OUTER JOIN question q ON t.id = q.topic_id
+        GROUP BY t.id, t.name
+        ORDER BY name ASC;''')
     return c.fetchall()
 def add_topic(topic_name):
     c = get_cursor()

@@ -1,0 +1,29 @@
+$def with(id, name, questions)
+<html>
+<head>
+	<title>Питання до теми $name</title>
+	<link rel="stylesheet" href="/static/questions.css">
+</head>
+<body>
+	<h1>Питання до теми $name</h1>
+	<table>
+			<tr>
+				<th>Питання</th>
+				<th>Відповіді</th>
+			</tr>
+				$for id in questions:
+					$ question = questions[id]
+					$ type = 'checkbox' if question['multiselect'] else 'radio'
+					<tr>
+						<td style="width: 15cm">$question['text']</td>
+						<td>
+							$for ans in question['answers']:
+								$ name = id
+								$ value = ans['id']
+								$ correct = "correct" if ans['correct'] else ''
+								<input type="$type" name="$name" value="$value"/> <span class="$correct" for="$name">$ans['text']</span><br/>
+						</td>
+					</tr>
+		</table>
+</body>
+</html>

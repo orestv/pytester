@@ -21,9 +21,12 @@ function loadTopics(topics) {
 		addTopicRow(topics[i])
 }
 function addTopicRow(topic) {
-	var id = topic['id'], name = topic['name']
-	var tdName = $('<td>').text(name)
+	var id = topic['id'], name = topic['name'], questionCount = topic['question_count']
+	var tdName = $('<td>')
+	var tdQuestions = $('<td>').css('text-align', 'center').text(questionCount)
 	var tdActions = $('<td>')
+	var aQuestion = $('<a>').attr('href', 'questions?topic_id=' + id)
+							.text(name)
 	var btnDelete = $('<input>').attr('type', 'button')
 								.attr('value', 'Видалити')
 								.click(function() {
@@ -34,12 +37,14 @@ function addTopicRow(topic) {
 								.click(function() {
 									topicRenamePrepare(id, name)
 								})
+	tdName.append(aQuestion)
 	tdActions.append(btnRename)
 		.append(btnDelete)
 	$('#tblTopics').find('tbody')
 		.append($('<tr>')
 			.attr('id', 'row_' + id)
 			.append(tdName)
+			.append(tdQuestions)
 			.append(tdActions)
 		)
 }
