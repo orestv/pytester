@@ -9,7 +9,8 @@ urls = (
     '/generateTest', 'GenerateTest',
     '/topic', 'Topic',
     '/topics', 'Topics',
-    '/questions', 'Questions'
+    '/questions', 'Questions',
+    '/uploadQuestions', 'QuestionsUpload'
 )
 render = web.template.render('templates/')
 app = web.application(urls, locals())
@@ -31,7 +32,7 @@ class GenerateTest:
 
 class Login:
     def POST(self):
-        i = web.input(name=None)
+        i = web.input()
         password = i.password
         if password == 'HardTaught':
             web.ctx.session['admin_logged_in'] = True
@@ -44,15 +45,23 @@ class Login:
 
 class Questions:
     def GET(self):
-        i = web.input(name=None)
-        id = i.topic_id
-        name = model.get_topic(id)['name']
-        questions = model.get_questions_for_topic(id)
-        return render.questions(id, name, questions)
+        i = web.input()
+        topic_id = i.topic_id
+        topic_name = model.get_topic(topic_id)['name']
+        questions = model.get_questions_for_topic(topic_id)
+        return render.questions(topic_id, topic_name, questions)
+
+class QuestionsUpload:
+    def POST(self):
+        i = web.input()
+        questions = i['file']
+        topic_id = i['topic_id']
+        model.upload_questions(topic_id, questions)
+        raise web.seeother('/questions?topic_id=%(id)s' % {'id': topic_id})
 
 class Topic:
     def POST(self):
-        i = web.input(name=None)
+        i = web.input()
         action = i.action
         if action == 'add':
             name = i.name

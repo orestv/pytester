@@ -109,6 +109,55 @@ def update_answers(student_id, attempt_id, question_id, answers):
         c.execute('''INSERT INTO student_answer (student_id, test_attempt_id, answer_id)
             VALUES (%s, %s, %s)''', (student_id, attempt_id, ans))
 
+def detect_linebreaks(input):
+    linebreaks = ['\n', '\n\r', '\r\n']
+    def cmp_(x, y):
+        if cmp(x[0], y[0]):
+            return -cmp(x[0], y[0])
+        return -cmp(len(x[1]), len(y[1]))
+    nl = map(lambda x : (input.count(x), x), linebreaks)
+    nl.sort(cmp_)
+    return nl[0][1]
+
+def question_exists(topic_id, question_text):
+    c = get_cursor()
+    c.execute('''SELECT CASE WHEN EXISTS
+            (SELECT * FROM question WHERE topic_id = %s AND text = %s)
+        THEN 1 ELSE 0 END AS question_exists;''', (topic_id, question_text))
+    return bool(c.fetchone()['question_exists'])
+def add_question(topic_id, text, comment, multiselect):
+    c = get_cursor()
+    c.execute('''INSERT INTO question (topic_id, text, comment, multiselect)
+        VALUES (%s, %s, %s, %s);''', (topic_id, text, comment, multiselect))
+    return c.lastrowid
+def add_answer(question_id, text, correct):
+    c = get_cursor()
+    c.execute('''INSERT INTO answer (question_id, text, correct)
+            VALUES (%s, %s, %s);''', (question_id, text, correct))
+
+def upload_questions(topic_id, questions):
+    lb = detect_linebreaks(questions)
+    questions = questions.split(lb+lb+lb)
+    for block in questions:
+        rows = block.split(lb)
+        question_text = rows[0]
+        if question_exists(topic_id, question_text):
+            continue
+        question_comment = None
+        answers = rows[1:]
+        if rows[-1].startswith('//'):
+            comment = rows[-1]
+            answers = rows[1:-1]
+        multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1
+        question_id = add_question(topic_id, question_text, question_comment, multiselect)
+        print 'Inserted question ', question_text, ', id = ', question_id
+        for answer in answers:
+            correct = answer.startswith('*')
+            answer_text = answer.lstrip('*')
+            add_answer(question_id, answer_text, correct)
+            print 'Inserted answer ', answer_text
+
+
 def get_topic(topic_id):
     c = get_cursor()
     c.execute('''SELECT id, name FROM topic WHERE id = %s''', (topic_id))

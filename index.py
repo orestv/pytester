@@ -25,7 +25,7 @@ app.add_processor(web.loadhook(session_hook))
 
 class LoginHandler:
     def POST(self):
-        i = web.input(name=None)
+        i = web.input()
         firstname = i.firstname
         lastname = i.lastname
         student_id = model.get_student(firstname, lastname)['id']

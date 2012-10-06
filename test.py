@@ -25,7 +25,7 @@ class Test:
 
 class Start:
 	def GET(self):
-		i = web.input(name=None)
+		i = web.input()
 		test_id = i.test_id
 		student_id = web.ctx.session['student_id']
 		attempt_id = model.start_new_attempt(test_id, student_id)
@@ -33,7 +33,7 @@ class Start:
 
 class Continue:
 	def GET(self):
-		i = web.input(name=None)
+		i = web.input()
 		attempt_id = i.attempt_id
 		test = model.get_test_for_attempt(attempt_id)
 		print test
@@ -42,7 +42,7 @@ class Continue:
 
 class HandleAnswer:
 	def POST(self):
-		i = web.input(name=None)
+		i = web.input()
 		attempt_id = i.attempt_id
 		question_id = i.question_id
 		answers = i.answers.strip(',').split(',')
