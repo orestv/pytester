@@ -102,3 +102,7 @@ def delete_topic(topic_id):
         LEFT OUTER JOIN question q ON t.id = q.topic_id
         LEFT OUTER JOIN answer a ON q.id = a.question_id
         WHERE t.id = %s''', (topic_id))
+def rename_topic(topic_id, topic_name):
+    c = get_cursor()
+    c.execute('''UPDATE topic SET name = %s WHERE id = %s''',
+        (topic_name, topic_id))

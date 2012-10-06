@@ -51,3 +51,8 @@ class Topic:
         elif action == 'delete':
             id = i.id
             model.delete_topic(id)
+        elif action == 'rename':
+            id = i.id
+            name = i.name
+            print id, name
+            model.rename_topic(id, name)
