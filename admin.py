@@ -42,8 +42,12 @@ class Login:
         return render.admin()
 
 class Topic:
-    def GET(self):
+    def POST(self):
         i = web.input(name=None)
         action = i.action
         if action == 'add':
             name = i.name
+            model.add_topic(name)
+        elif action == 'delete':
+            id = i.id
+            model.delete_topic(id)

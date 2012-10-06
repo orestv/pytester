@@ -90,9 +90,15 @@ def update_answers(student_id, attempt_id, question_id, answers):
 
 def get_topics():
     c = get_cursor()
-    c.execute('''SELECT id, name FROM topic''')
+    c.execute('''SELECT id, name FROM topic ORDER BY name ASC;''')
     return c.fetchall()
 def add_topic(topic_name):
     c = get_cursor()
     c.execute('INSERT INTO topic (name) VALUES (%s);', (topic_name))
     return c.lastrowid
+def delete_topic(topic_id):
+    c = get_cursor()
+    c.execute('''DELETE t FROM topic t
+        LEFT OUTER JOIN question q ON t.id = q.topic_id
+        LEFT OUTER JOIN answer a ON q.id = a.question_id
+        WHERE t.id = %s''', (topic_id))

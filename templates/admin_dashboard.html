@@ -1,23 +1,22 @@
-$def with(topics)
+﻿$def with(topics)
 <html>
 <head>
 	<title>Admin Dashboard</title>
 	<script src="/static/jquery.js"></script>
 	<script src="/static/admin_dashboard.js"></script>
 </head>
-<body>
+<body onload="bodyLoaded();">
 	<h1>Admin Dashboard</h1>
 	<h2>Теми</h2>
 	<table id="tblTopics">
-		<tr id="rwHeader_topic">
+		<tr>
 			<th>Назва</th>
 			<th>Дії</th>
 		</tr>
-		$for topic in topics:
-			<tr>
-				<td>$topic['name']</td>
-				<td><a href="topic?action=delete">Delete</a></td>
-			</tr>
+		<tr>
+			<td><input type="text" id="txtTopicName" placeholder="Нова тема" style="width: 100%;"/></td>
+			<td><input type="button" onclick="btnAddTopic_clicked()" value="Додати"/></td>
+		</tr>
 	</table>
 	<input type="button" value="Reload topics" onclick="reloadTopics();"/>
 </body>
