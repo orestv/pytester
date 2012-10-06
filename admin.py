@@ -1,4 +1,4 @@
-import web
+import web, http
 import model
 import json
 
@@ -23,6 +23,7 @@ class Dashboard:
 class Topics:
     def GET(self):
         topics = model.get_topics()
+        http.expires(-1)
         return json.dumps(topics)
 
 class GenerateTest:

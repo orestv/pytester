@@ -11,7 +11,7 @@ function btnAddTopic_clicked() {
 
 function reloadTopics() {
 	clearTopics()
-	$.getJSON('topics', loadTopics)
+	$.getJSON('topics?rnd=' + Math.random(), loadTopics)
 }
 function clearTopics() {
 	$('#tblTopics tr:gt(1)').remove()
