@@ -92,3 +92,7 @@ def get_topics():
     c = get_cursor()
     c.execute('''SELECT id, name FROM topic''')
     return c.fetchall()
+def add_topic(topic_name):
+    c = get_cursor()
+    c.execute('INSERT INTO topic (name) VALUES (%s);', (topic_name))
+    return c.lastrowid

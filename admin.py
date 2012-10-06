@@ -1,21 +1,29 @@
 import web
 import model
+import json
 
 urls = (
-    '/', 'Dashboard',
+    '/?', 'Dashboard',
+    # '', 'Dashboard',
     '/login', 'Login',
-    '/generateTest', 'GenerateTest'
+    '/generateTest', 'GenerateTest',
+    '/topic', 'Topic',
+    '/topics', 'Topics'
 )
 render = web.template.render('templates/')
 app = web.application(urls, locals())
 
-
 class Dashboard:
     def GET(self):
-        if not web.ctx.session['admin_logged_in']:
+        if not web.ctx.session.get('admin_logged_in'):
             raise web.seeother('/login')
         topics = model.get_topics()
         return render.admin_dashboard(topics)
+
+class Topics:
+    def GET(self):
+        topics = model.get_topics()
+        return json.dumps(topics)
 
 class GenerateTest:
     pass
@@ -32,3 +40,10 @@ class Login:
 
     def GET(self):
         return render.admin()
+
+class Topic:
+    def GET(self):
+        i = web.input(name=None)
+        action = i.action
+        if action == 'add':
+            name = i.name
