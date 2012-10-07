@@ -48,9 +48,13 @@ class Questions:
     def GET(self):
         i = web.input()
         topic_id = i.topic_id
-        topic_name = model.get_topic(topic_id)['name']
-        questions = model.get_questions_for_topic(topic_id)
-        return render.questions(topic_id, topic_name, questions)
+        if i.get('json'):
+            questions = model.get_questions_for_topic(topic_id)
+            return json.dumps(questions)
+        else:
+            topic_name = model.get_topic(topic_id)['name']
+            return render.questions(topic_id, topic_name)
+
 
 class QuestionsUpload:
     def POST(self):
@@ -64,7 +68,10 @@ class Question:
     def GET(self):
         i = web.input()
         question_id = i['question_id']
-        topic_id = model.get_question(question_id)['topic_id']
+        print 'question id is', question_id
+        question = model.get_question(question_id)
+        print 'Question is', question
+        topic_id = question['topic_id']
         action = i.action
         if action == 'delete':
             model.delete_question(question_id)

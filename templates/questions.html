@@ -1,35 +1,24 @@
-$def with(topic_id, topic_name, questions)
+$def with(topic_id, topic_name)
 <html>
 <head>
 	<title>Питання до теми $topic_name</title>
 	<link rel="stylesheet" href="/static/questions.css">
+	<script src="/static/jquery.js"></script>
+	<script src="/static/questions.js"></script>
 </head>
-<body>
-	<h1>Питання до теми $topic_name</h1>
+<body onload="bodyLoaded();">
+	<a href="/admin">Головна</a>
+	<h1>Питання до теми $topic_name (кількість: <span id="spQuestionCount"></span>)</h1>
 	<form action="uploadQuestions" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="topic_id" value="$topic_id">
+		<input type="hidden" name="topic_id" id="topic_id" value="$topic_id">
 		Виберіть файл: <input type="file" name="file" required="required"/> <input type="submit" value="Завантажити"/>
 	</form>
-	<table>
+	<table id="tblQuestions">
 		<tr>
 			<th>Питання</th>
 			<th>Відповіді</th>
 			<th>Дії</th>
 		</tr>
-			$for id in questions:
-				$ question = questions[id]
-				$ type = 'checkbox' if question['multiselect'] else 'radio'
-				<tr>
-					<td style="width: 15cm">$question['text']</td>
-					<td>
-						$for ans in question['answers']:
-							$ name = id
-							$ value = ans['id']
-							$ correct = "correct" if ans['correct'] else ''
-							<input type="$type" name="$name" value="$value"/> <span class="$correct" for="$name">$ans['text']</span><br/>
-					</td>
-					<td><a href="question?action=delete&question_id=$id">Delete</a></td>
-				</tr>
 		</table>
 </body>
 </html>

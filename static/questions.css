@@ -1,3 +1,7 @@
 .correct {
 	color: green;
 }
+
+#tblQuestions {
+	width: 80%
+}
