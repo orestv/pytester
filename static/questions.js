@@ -16,9 +16,11 @@ function loadQuestions(questions) {
 }
 function addQuestionRow(id, question) {
 	var text = question['text'],
-		multiselect = question['multiselect']
+		multiselect = question['multiselect'],
+		comment = question['comment']
 	var tdQuestion = $('<td>').text(text)
 	var tdAnswers = $('<td>')
+	var tdComment = $('<td>').text(comment != null ? comment : '')
 	var tdActions = $('<td>')
 
 	var ulAnswers = $('<ul>')
@@ -43,6 +45,7 @@ function addQuestionRow(id, question) {
 		.append($('<tr>')
 			.append(tdQuestion)
 			.append(tdAnswers)
+			.append(tdComment)
 			.append(tdActions))
 }
 function deleteQuestion(questionId) {

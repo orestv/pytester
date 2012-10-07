@@ -78,7 +78,7 @@ def get_questions_for_test(test_id, student_id, attempt_id):
     return result
 def get_questions_for_topic(topic_id):
     c = get_cursor()
-    c.execute('''SELECT q.id, q.text, q.multiselect,
+    c.execute('''SELECT q.id, q.text, q.multiselect, q.comment,
         a.id AS ans_id, a.text AS ans_text, correct
         FROM question q
         INNER JOIN answer a ON q.id = a.question_id
@@ -95,6 +95,7 @@ def get_questions_for_topic(topic_id):
         else:
             result[id] = {'text': row['text'],
                         'multiselect': row['multiselect'],
+                        'comment': row['comment'],
                         'answers': [answer]}
     return result
 
@@ -132,6 +133,7 @@ def question_exists(topic_id, question_text):
     return bool(c.fetchone()['question_exists'])
 def add_question(topic_id, text, comment, multiselect):
     c = get_cursor()
+    print 'Comment:', comment
     c.execute('''INSERT INTO question (topic_id, text, comment, multiselect)
         VALUES (%s, %s, %s, %s);''', (topic_id, text, comment, multiselect))
     return c.lastrowid
@@ -156,7 +158,7 @@ def upload_questions(topic_id, questions):
         question_comment = None
         answers = rows[1:]
         if rows[-1].startswith('//'):
-            comment = rows[-1]
+            question_comment = rows[-1][2:]
             answers = rows[1:-1]
         multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1
         question_id = add_question(topic_id, question_text, question_comment, multiselect)
