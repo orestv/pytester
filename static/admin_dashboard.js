@@ -1,5 +1,6 @@
 function bodyLoaded() {
 	reloadTopics()
+	reloadTests()
 }
 
 function btnAddTopic_clicked() {
@@ -8,17 +9,52 @@ function btnAddTopic_clicked() {
 		return
 	addTopic(name)
 }
+function btnCreateTest_clicked() {
+	var data = $('#frmCreateTest').serialize()
+	$.ajax({
+		url: '/admin/generatetest',
+		data: data,
+		type: 'POST',
+		success: testGenerated
+	})
+}
+
+function reloadTests() {
+	clearTests()
+	$.getJSON('/admin/tests?rnd=' + Math.random(), loadTests)
+}
 
 function reloadTopics() {
 	clearTopics()
 	$.getJSON('/admin/topics?rnd=' + Math.random(), loadTopics)
 }
+
+function clearTests() {
+	$('#tblTests tr:gt(1)').remove()
+}
 function clearTopics() {
 	$('#tblTopics tr:gt(1)').remove()
+	$('#ulTopics li').remove()
+}
+
+function loadTests(tests) {
+	for (var i = 0; i < tests.length; i++)
+		addTestRow(tests[i])
 }
 function loadTopics(topics) {
 	for (var i = 0; i < topics.length; i++)
 		addTopicRow(topics[i])
+}
+function addTestRow(test) {
+	var id = test['id'], name = test['name'],
+		final = Boolean(test['final'])
+	var tdName = $('<td>').text(name)
+
+	$('#tblTests').find('tbody')
+		.append($('<tr>')
+			.append(tdName)
+			.append('<td>')
+			.append('<td>'))
 }
 function addTopicRow(topic) {
 	var id = topic['id'], name = topic['name'], questionCount = topic['question_count']
@@ -47,6 +83,15 @@ function addTopicRow(topic) {
 			.append(tdQuestions)
 			.append(tdActions)
 		)
+	var topicInput = $('<input>').attr('name', 'topics')
+		.attr('value', id)
+		.attr('type', 'checkbox')
+		.attr('id', 'topic_' + id)
+	var topicLabel = $('<label>').attr('for', 'topic_' + id)
+		.text(name)
+	$('#ulTopics').append($('<li>')
+		.append(topicInput)
+		.append(topicLabel))
 }
 
 function topicRenamePrepare(id, name) {
@@ -94,4 +139,8 @@ function renameTopic(id, name) {
 		type: 'POST',
 		success: reloadTopics
 	})
+}
+
+function testGenerated() {
+
 }

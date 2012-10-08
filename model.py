@@ -169,6 +169,11 @@ def upload_questions(topic_id, questions):
             add_answer(question_id, answer_text, correct)
             print 'Inserted answer ', answer_text
 
+def get_tests():
+    c = get_cursor()
+    c.execute('''SELECT id, name, final, questionCount FROM test''')
+    return c.fetchall()
+
 
 def get_topic(topic_id):
     c = get_cursor()

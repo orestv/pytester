@@ -2,10 +2,26 @@ table input[type=text] {
 	width: 100%;
 }
 
+div {
+	margin-bottom: 1cm;
+}
+
 #dvTopics {
-	width: 50%;
+	width: 45%;
 	text-align: center;
+	float: left;
+}
+#dvTests {
+	width: 45%;
+	text-align: center;
+	float: left;
+}
+#dvGenerateTest {
+	clear: both;
 }
 #tblTopics {
 	width: 100%;
+}
+#ulTopics {
+	list-style-type: none;
 }
