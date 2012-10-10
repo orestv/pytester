@@ -44,7 +44,7 @@ $def with(student, attempts, tests)
 				<td>$attempt['end']</td>
 				<td>
 					$if not attempt['end']:
-						<a href="/test/continue?attempt_id=$attempt['id']">
+						<a href="/test/continue?attempt_id=$attempt['attempt_id']&test_id=$attempt['test_id']">
 							Continue
 						</a>
 				</td>

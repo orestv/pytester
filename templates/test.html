@@ -18,14 +18,21 @@ $def with(test_name, attempt_id, questions)
 					$ type = 'checkbox' if question['multiselect'] else 'radio'
 					$ answered = filter(lambda ans : ans['selected'] == 1, question['answers'])
 					<tr>
-						<td style="width: 15cm">$question['text']</td>
+						<td style="width: 15cm">
+							$question['text']
+						</td>
 						<td>
 							$for ans in question['answers']:
 								$ name = id
 								$ value = ans['id']
 								$ checked = 'checked' if ans['selected'] else ''
 								$ disabled = 'disabled' if answered else ''
-								<input type="$type" name="$name" value="$value" $checked $disabled onchange="answerUpdated($id);"/> <label for="$name">$ans['text']</label><br/>
+								<input type="$type" id="$value" name="$name" value="$value" $checked $disabled onchange="answerUpdated($id);"/> <label for="$value">$ans['text']</label><br/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<hr>
 						</td>
 					</tr>
 		</table>

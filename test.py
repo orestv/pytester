@@ -35,9 +35,7 @@ class Continue:
 	def GET(self):
 		i = web.input()
 		attempt_id = i.attempt_id
-		test = model.get_test_for_attempt(attempt_id)
-		print test
-		test_id = test['id']
+		test_id = i.test_id
 		raise web.seeother('/test?attempt_id=%s&test_id=%s'%(attempt_id, test_id))
 
 class HandleAnswer:
