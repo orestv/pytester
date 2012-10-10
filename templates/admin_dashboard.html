@@ -35,9 +35,15 @@
 	</div>
 	<div id="dvGenerateTest">
 		<h2>Створити тест</h2>
-		<form action="/admin/generateTest" method="POST" id="frmCreateTest">
+		<form action="/admin/test" method="POST" id="frmCreateTest">
 			<ul id="ulTopics"></ul>
 			<table>
+				<tr>
+					<td><label for="name">Назва</label></td>
+					<td>
+						<input type="text" id="name" name="name" required>
+					</td>
+				</tr>
 				<tr>
 					<td><label for="questionCount">Кількість питань</label></td>
 					<td>
@@ -46,10 +52,11 @@
 				</tr>
 				<tr>
 					<td><label for="chkFinal">Фінальний</label></td>
-					<td><input type="checkbox" id="chkFinal" name="final"></td>
+					<td><input type="checkbox" id="chkFinal" name="final" value="True"></td>
 				</tr>
 			</table>
-			<input type="button" value="Створити" onclick="btnCreateTest_clicked();">
+			<input type="submit" value="Створити" onclick="btnCreateTest_clicked(); return false;">
+			<input type="hidden" name="action" value="add">
 		</form>
 	</div>
 	<!-- <input type="button" value="Reload topics" onclick="reloadTopics();"/> -->

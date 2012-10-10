@@ -6,7 +6,7 @@ urls = (
     '/?', 'Dashboard',
     # '', 'Dashboard',
     '/login', 'Login',
-    '/generateTest', 'GenerateTest',
+    '/test', 'Test',
     '/tests', 'Tests',
     '/topic', 'Topic',
     '/topics', 'Topics',
@@ -34,12 +34,20 @@ class Tests:
         tests = model.get_tests()
         return json.dumps(tests)
 
-class GenerateTest:
+class Test:
     def POST(self):
-        i = web.input(topics = [])
-        topics = [int(x) for x in i.topics]
-        question_count = int(i.question_count)
-        return topics
+        i = web.input(topics = [], final = False)
+        action = i.action
+        if action == 'add':
+            topic_ids = [int(x) for x in i.topics]
+            question_count = int(i.question_count)
+            name = i.name
+            final = i.final
+            model.add_test(name, topic_ids, question_count, final)
+        elif action == 'rename':
+            pass
+        elif action == 'delete':
+            pass
 
 class Login:
     def POST(self):

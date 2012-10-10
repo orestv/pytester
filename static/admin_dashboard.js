@@ -12,7 +12,7 @@ function btnAddTopic_clicked() {
 function btnCreateTest_clicked() {
 	var data = $('#frmCreateTest').serialize()
 	$.ajax({
-		url: '/admin/generatetest',
+		url: '/admin/test',
 		data: data,
 		type: 'POST',
 		success: testGenerated
@@ -142,5 +142,5 @@ function renameTopic(id, name) {
 }
 
 function testGenerated() {
-
+	reloadTests()
 }

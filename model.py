@@ -8,12 +8,14 @@ def get_student(firstname, lastname):
     c = get_cursor()
     c.execute('SELECT id, hash FROM student WHERE firstname = %s AND lastname = %s', (firstname, lastname))
     return c.fetchone()
-
+def get_students():
+    c = get_cursor()
+    c.execute('''SELECT id, firstname, lastname, hash FROM student''')
+    return c.fetchall()
 def get_student_info(id):
     c = get_cursor()
     c.execute('SELECT id, firstname, lastname, hash FROM student WHERE id = %s', (id))
     return c.fetchone()
-
 def get_student_test_attempts(id):
     c = get_cursor()
     c.execute('''SELECT t.id, t.name, ta.start, ta.end
@@ -22,7 +24,6 @@ def get_student_test_attempts(id):
         WHERE ta.student_id = %s
         ORDER BY ta.start DESC''', (id))
     return c.fetchall()
-
 def get_student_available_tests(id):
     c = get_cursor()
     c.execute('''SELECT DISTINCT (test.id), test.name AS name,
@@ -63,7 +64,6 @@ def get_questions_for_test(test_id, student_id, attempt_id):
         ORDER BY qsq.order ASC;''', (student_id, attempt_id, test_id, student_id))
     rows = c.fetchall()
     result = {}
-
     for row in rows:
         id = row['id']
         answer = {'id': row['ans_id'],
@@ -133,7 +133,6 @@ def question_exists(topic_id, question_text):
     return bool(c.fetchone()['question_exists'])
 def add_question(topic_id, text, comment, multiselect):
     c = get_cursor()
-    print 'Comment:', comment
     c.execute('''INSERT INTO question (topic_id, text, comment, multiselect)
         VALUES (%s, %s, %s, %s);''', (topic_id, text, comment, multiselect))
     return c.lastrowid
@@ -156,24 +155,65 @@ def upload_questions(topic_id, questions):
         if question_exists(topic_id, question_text):
             continue
         question_comment = None
-        answers = rows[1:]
-        if rows[-1].startswith('//'):
-            question_comment = rows[-1][2:]
-            answers = rows[1:-1]
-        multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1
+        answers = rows[1:]  #all rows except first
+        if rows[-1].startswith('//'):   #is last row comment?
+            question_comment = rows[-1][2:] #last row without //
+            answers = rows[1:-1]    #all rows except first and last
+        multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1    #count correct answers
         question_id = add_question(topic_id, question_text, question_comment, multiselect)
-        print 'Inserted question ', question_text, ', id = ', question_id
         for answer in answers:
             correct = answer.startswith('*')
-            answer_text = answer.lstrip('*')
+            if correct:
+                answer_text = answer.lstrip('*')
             add_answer(question_id, answer_text, correct)
-            print 'Inserted answer ', answer_text
 
 def get_tests():
     c = get_cursor()
     c.execute('''SELECT id, name, final, questionCount FROM test''')
     return c.fetchall()
+def delete_test(test_id):
+    c = get_cursor()
+    c.execute('''DELETE t, ta, qs
+        FROM test t
+        LEFT OUTER JOIN test_attempt ta ON t.id = ta.test_id
+        LEFT OUTER JOIN question_sequence qs ON t.id = qs.test_id
+        WHERE t.id = %s''',
+        (test_id))
+def rename_test(test_id):
+    c = get_cursor()
+    c.execute('''UPDATE test
+        SET name = %s
+        WHERE id = %s''', (test_id))
+def add_test(name, topic_ids, question_count, final):
+    c = get_cursor()
+    c.execute('''INSERT INTO test (name, questionCount, final)
+        VALUES (%s, %s, %s)''',
+        (name, question_count, final))
+    test_id = c.lastrowid
+    for topic_id in topic_ids:     #fill test topics
+        c.execute('''INSERT INTO test_topics (test_id, topic_id)
+            VALUES (%s, %s)''',
+            (test_id, topic_id))
+    if final:
+        students = get_students()
+        for student in students:
+            add_question_sequence(student['id'], test_id, topic_ids, question_count)
+    else:
+        add_question_sequence(None, test_id, topic_ids, question_count)
 
+def add_question_sequence(student_id, test_id, topic_ids, question_count):
+    c = get_cursor()
+    c.execute('''INSERT INTO question_sequence (student_id, test_id)
+        VALUES (%s, %s)''', (student_id, test_id))
+    sequence_id = c.lastrowid
+    topic_ids_string = ','.join(map(lambda x:str(x), topic_ids))
+    c.execute('''INSERT INTO question_sequence_questions
+        (sequence_id, question_id, `order`)
+        SELECT %s, id, @order := @order + 1 AS `order` FROM
+            ( SELECT id FROM question
+            WHERE topic_id IN (''' + topic_ids_string + ''') ORDER BY RAND() LIMIT %s)
+        qs, (SELECT @order := 0) o''',
+        (sequence_id, question_count))
 
 def get_topic(topic_id):
     c = get_cursor()
