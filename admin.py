@@ -45,9 +45,11 @@ class Test:
             final = i.final
             model.add_test(name, topic_ids, question_count, final)
         elif action == 'rename':
-            pass
+            name = i.name
+            model.rename_test(test_id, name)
         elif action == 'delete':
-            pass
+            test_id = i.id
+            model.delete_test(test_id)
 
 class Login:
     def POST(self):

@@ -173,18 +173,20 @@ def get_tests():
     return c.fetchall()
 def delete_test(test_id):
     c = get_cursor()
-    c.execute('''DELETE t, ta, qs
+    c.execute('''DELETE t, ta, qs, qsq
         FROM test t
         LEFT OUTER JOIN test_attempt ta ON t.id = ta.test_id
         LEFT OUTER JOIN question_sequence qs ON t.id = qs.test_id
+        LEFT OUTER JOIN question_sequence_questions qsq ON qs.id = qs.sequence_id
         WHERE t.id = %s''',
         (test_id))
-def rename_test(test_id):
+def rename_test(test_id, test_name):
     c = get_cursor()
     c.execute('''UPDATE test
         SET name = %s
-        WHERE id = %s''', (test_id))
+        WHERE id = %s''', (test_name, test_id))
 def add_test(name, topic_ids, question_count, final):
+    final = 1 if final else 0
     c = get_cursor()
     c.execute('''INSERT INTO test (name, questionCount, final)
         VALUES (%s, %s, %s)''',

@@ -30,7 +30,7 @@ function reloadTopics() {
 }
 
 function clearTests() {
-	$('#tblTests tr:gt(1)').remove()
+	$('#tblTests tr:gt(0)').remove()
 }
 function clearTopics() {
 	$('#tblTopics tr:gt(1)').remove()
@@ -49,12 +49,23 @@ function addTestRow(test) {
 	var id = test['id'], name = test['name'],
 		final = Boolean(test['final'])
 	var tdName = $('<td>').text(name)
+	var tdFinal = $('<td>').text(test['final'])
+	var tdActions = $('<td>')
+
+	var btnDelete = $('<input>')
+		.attr('type', 'button')
+		.attr('value', 'Видалити')
+		.on('click', function() {
+			deleteTest(id, name)
+		})
+
+	tdActions.append(btnDelete)
 
 	$('#tblTests').find('tbody')
 		.append($('<tr>')
 			.append(tdName)
-			.append('<td>')
-			.append('<td>'))
+			.append(tdFinal)
+			.append(tdActions))
 }
 function addTopicRow(topic) {
 	var id = topic['id'], name = topic['name'], questionCount = topic['question_count']
@@ -122,6 +133,16 @@ function deleteTopic(id, name) {
 		data: {action: 'delete', id: id},
 		type: 'POST',
 		success: reloadTopics
+	})
+}
+function deleteTest(id, name) {
+	if (!confirm('Ви впевнені, що бажаєте видалити тест \"' + name + '\"?'))
+		return
+	$.ajax({
+		url: '/admin/test',
+		data: {action: 'delete', id: id},
+		type: 'POST',
+		success: reloadTests
 	})
 }
 function addTopic(name) {

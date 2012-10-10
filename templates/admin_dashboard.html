@@ -35,7 +35,7 @@
 	</div>
 	<div id="dvGenerateTest">
 		<h2>Створити тест</h2>
-		<form action="/admin/test" method="POST" id="frmCreateTest">
+		<form action="/admin/test" method="POST" id="frmCreateTest" onsubmit="btnCreateTest_clicked();return false">
 			<ul id="ulTopics"></ul>
 			<table>
 				<tr>
@@ -55,7 +55,7 @@
 					<td><input type="checkbox" id="chkFinal" name="final" value="True"></td>
 				</tr>
 			</table>
-			<input type="submit" value="Створити" onclick="btnCreateTest_clicked(); return false;">
+			<input type="submit" value="Створити">
 			<input type="hidden" name="action" value="add">
 		</form>
 	</div>
