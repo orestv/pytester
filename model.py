@@ -16,15 +16,16 @@ def get_student_info(id):
     c = get_cursor()
     c.execute('SELECT id, firstname, lastname, hash FROM student WHERE id = %s', (id))
     return c.fetchone()
-def get_student_test_attempts(id):
+def get_student_test_attempts(student_id):
     c = get_cursor()
-    c.execute('''SELECT t.id, t.name, ta.start, ta.end
+    c.execute('''SELECT t.id AS test_id, t.name, 
+        ta.id AS attempt_id, ta.start, ta.end
         FROM test_attempt ta
         INNER join test t ON ta.test_id = t.id
         WHERE ta.student_id = %s
-        ORDER BY ta.start DESC''', (id))
+        ORDER BY ta.start DESC''', (student_id))
     return c.fetchall()
-def get_student_available_tests(id):
+def get_student_available_tests(student_id):
     c = get_cursor()
     c.execute('''SELECT DISTINCT (test.id), test.name AS name,
         MAX(ta.result) AS result, COUNT(DISTINCT qsq.question_id) AS maxresult FROM test
@@ -34,7 +35,7 @@ def get_student_available_tests(id):
             ON qs.test_id = test.id AND (qs.student_id = %s OR qs.student_id IS NULL)
         INNER JOIN question_sequence_questions qsq
             ON qsq.sequence_id = qs.id
-        GROUP BY test.id, qs.id''', (id, id))
+        GROUP BY test.id, qs.id''', (student_id, student_id))
     return c.fetchall()
 
 def start_new_attempt(test_id, student_id):
