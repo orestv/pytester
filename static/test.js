@@ -1,3 +1,7 @@
+function bodyLoaded() {
+	submitStateUpdate()
+}
+
 function createRequest() {
 	if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
 		return new XMLHttpRequest();
@@ -20,4 +24,17 @@ function answerUpdated(questionId) {
 	request.open('POST', url, true)
 	request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	request.send(params)
+	submitStateUpdate()
+}
+
+function submitStateUpdate() {
+	var canSubmit = true;
+	$('td[name=questionContainer]').each(function(index, value) {
+		if ($(this).find('input:checked').size() == 0)
+			canSubmit = false;
+	})
+	if (canSubmit)
+		$('#btnSubmit').removeAttr('disabled')
+	else
+		$('#btnSubmit').attr('disabled', 'disabled')
 }

@@ -48,6 +48,9 @@ def get_test_for_attempt(attempt_id):
     c.execute('''SELECT id FROM  test_attempt WHERE id = %s''', (attempt_id))
     return c.fetchone()
 
+def save_test_attempt(attempt_id):
+    pass
+
 def get_questions_for_test(test_id, student_id, attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,

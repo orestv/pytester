@@ -16,12 +16,17 @@ class retest:
 
 class Test:
 	def GET(self):
-		i = web.input(name = None)
+		i = web.input()
 		attempt_id = i.attempt_id
 		test_id = i.test_id
 		student_id = web.ctx.session['student_id']
 		questions = model.get_questions_for_test(test_id, student_id, attempt_id)
 		return render.test('Test', attempt_id, questions)
+	def POST(self):
+		i = web.input()
+		attempt_id = i.attempt_id
+		model.save_test_attempt(attempt_id)
+		raise web.seeother('../dashboard')
 
 class Start:
 	def GET(self):

@@ -3,11 +3,11 @@ $def with(test_name, attempt_id, questions)
 	<head>
 		<title>Test</title>
 	</head>
+	<script src="/static/jquery.js"></script>
 	<script src="/static/test.js"></script>
-<body>
+<body onload="bodyLoaded();">
 	<h1>Проходження тесту "$test_name"</h1>
-	<form action='handleResults' method="POST">
-		<input type="hidden" id="attemptId" value="$attempt_id"/>
+	<form action='test' method="POST">
 		<table>
 			<tr>
 				<th>Питання</th>
@@ -21,13 +21,12 @@ $def with(test_name, attempt_id, questions)
 						<td style="width: 15cm">
 							$question['text']
 						</td>
-						<td>
+						<td name="questionContainer">
 							$for ans in question['answers']:
 								$ name = id
 								$ value = ans['id']
 								$ checked = 'checked' if ans['selected'] else ''
-								$ disabled = 'disabled' if answered else ''
-								<input type="$type" id="$value" name="$name" value="$value" $checked $disabled onchange="answerUpdated($id);"/> <label for="$value">$ans['text']</label><br/>
+								<input type="$type" id="$value" name="$name" value="$value" $checked onchange="answerUpdated($id);"/> <label for="$value">$ans['text']</label><br/>
 						</td>
 					</tr>
 					<tr>
@@ -36,6 +35,8 @@ $def with(test_name, attempt_id, questions)
 						</td>
 					</tr>
 		</table>
+		<input type="hidden" name="attempt_id" id="attemptId" value="$attempt_id">
+		<input type="submit" id="btnSubmit" value="Зберегти" disabled="disabled">
 	</form>
 </body>
 </html>
