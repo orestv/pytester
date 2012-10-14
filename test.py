@@ -25,7 +25,7 @@ class Test:
 	def POST(self):
 		i = web.input()
 		attempt_id = i.attempt_id
-		model.save_test_attempt(attempt_id)
+		model.save_attempt(attempt_id)
 		raise web.seeother('../dashboard')
 
 class Start:

@@ -48,9 +48,52 @@ def get_test_for_attempt(attempt_id):
     c.execute('''SELECT id FROM  test_attempt WHERE id = %s''', (attempt_id))
     return c.fetchone()
 
-def save_test_attempt(attempt_id):
-    pass
+def save_attempt(attempt_id):
+    c = get_cursor()
+    result = get_attempt_result(attempt_id)
+    c.execute('''UPDATE test_attempt ta
+        SET end = CURRENT_TIMESTAMP(),
+            result = %s
+        WHERE ta.id = %s''',
+        (result, attempt_id))
+def get_attempt_result(attempt_id):
+    questions = get_questions_for_attempt(attempt_id)
+    print questions
+    results = [get_question_result(attempt_id, q['id']) for q in questions]
+    print results
+    return sum(results)
 
+def get_question_result(attempt_id, question_id):
+    c = get_cursor()
+    c.execute('''SELECT CASE WHEN EXISTS(
+        SELECT q.id, a.id, a.text, a.correct, ta.id
+        FROM question q
+        INNER JOIN answer a ON q.id = a.question_id
+        LEFT OUTER JOIN student_answer sa
+            ON a.id = sa.answer_id AND sa.test_attempt_id = %s
+        LEFT OUTER JOIN test_attempt ta
+            ON ta.id = sa.test_attempt_id
+        WHERE q.id = %s AND
+            ((a.correct = 1 AND ISNULL(sa.id) = 1)
+            OR (a.correct = 0 AND ISNULL(sa.id) = 0))
+    ) THEN 0 ELSE 1 END AS correct''',
+    (attempt_id, question_id))
+    return int(c.fetchone()['correct'])
+
+def get_questions_for_attempt(attempt_id):
+    c = get_cursor()
+    c.execute('''SELECT q.id
+        FROM question_sequence qs
+        INNER JOIN question_sequence_questions qsq
+            ON qs.id = qsq.sequence_id
+        INNER JOIN question q
+            ON q.id = qsq.question_id
+        INNER JOIN test_attempt ta
+            ON ta.test_id = qs.test_id
+            AND (ISNULL(qs.student_id) = 1 OR qs.student_id = ta.student_id)
+        WHERE ta.id = %s''',
+        (attempt_id))
+    return c.fetchall()
 def get_questions_for_test(test_id, student_id, attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,
@@ -165,10 +208,10 @@ def upload_questions(topic_id, questions):
             answers = rows[1:-1]    #all rows except first and last
         multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1    #count correct answers
         question_id = add_question(topic_id, question_text, question_comment, multiselect)
-        for answer in answers:
-            correct = answer.startswith('*')
+        for answer_text in answers:
+            correct = answer_text.startswith('*')
             if correct:
-                answer_text = answer.lstrip('*')
+                answer_text = answer_text.lstrip('*')
             add_answer(question_id, answer_text, correct)
 
 def get_tests():
