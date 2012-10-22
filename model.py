@@ -20,7 +20,7 @@ def get_student_info(id):
 def get_student_test_attempts(student_id):
     c = get_cursor()
     c.execute('''SELECT t.id AS test_id, t.name, 
-        ta.id AS attempt_id, ta.start, ta.end
+        ta.id AS attempt_id, ta.start, ta.end, ta.result
         FROM test_attempt ta
         INNER join test t ON ta.test_id = t.id
         WHERE ta.student_id = %s
