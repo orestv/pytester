@@ -21,12 +21,12 @@ $def with(test_name, attempt_id, questions)
 						<td style="width: 15cm">
 							$question['text']
 						</td>
-						<td name="questionContainer">
+						<td name="questionContainer" id="td_$id">
 							$for ans in question['answers']:
 								$ name = id
 								$ value = ans['id']
 								$ checked = 'checked' if ans['selected'] else ''
-								<input type="$type" id="$value" name="$name" value="$value" $checked onchange="answerUpdated($id);"/> <label for="$value">$ans['text']</label><br/>
+								<input type="$type" id="$value" name="$name" value="$value" $checked onchange="updateAnswer($id);"/> <label for="$value">$ans['text']</label><br/>
 						</td>
 					</tr>
 					<tr>
@@ -36,6 +36,7 @@ $def with(test_name, attempt_id, questions)
 					</tr>
 		</table>
 		<input type="hidden" name="attempt_id" id="attemptId" value="$attempt_id">
+		<input type="hidden" name="finished" id="finished" value="0">
 		<input type="submit" id="btnSubmit" value="Зберегти" disabled="disabled">
 	</form>
 </body>

@@ -1,4 +1,5 @@
 import MySQLdb
+import time
 
 def get_cursor():
     db = MySQLdb.connect(db='tests', user='root', passwd='sdntvFreud', charset='utf8', use_unicode=True)
@@ -58,9 +59,7 @@ def save_attempt(attempt_id):
         (result, attempt_id))
 def get_attempt_result(attempt_id):
     questions = get_questions_for_attempt(attempt_id)
-    print questions
     results = [get_question_result(attempt_id, q['id']) for q in questions]
-    print results
     return sum(results)
 
 def get_question_result(attempt_id, question_id):
@@ -148,6 +147,7 @@ def get_questions_for_topic(topic_id):
 
 def update_answers(student_id, attempt_id, question_id, answers):
     c = get_cursor()
+    time.sleep(1)
     c.execute('''DELETE sa
         FROM student_answer sa
         INNER JOIN answer a ON sa.answer_id = a.id
