@@ -1,4 +1,4 @@
-import web
+from webpy import web
 import model
 
 urls = (
