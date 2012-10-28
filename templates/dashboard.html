@@ -11,8 +11,8 @@ $def with(student, attempts, tests)
 	<table>
 		<tr>
 			<th>Назва</th>
-			<th>Результат</th>
-			<th>Actions</th>
+			<th>Кращий результат</th>
+			<th>Дії</th>
 		</tr>
 		$for test in tests:
 			<tr>
@@ -21,9 +21,9 @@ $def with(student, attempts, tests)
 					$if test['result'] is None:
 						N/A
 					$else:
-						$int(test['result']) / $test['maxresult']
+						$int(test['result'])/$test['question_count']
 				</td>
-				<td><a href="/test/start?test_id=$test['id']">Try</a></td>
+				<td><a href="/test/start?test_id=$test['id']">Пройти</a></td>
 			</tr>
 	</table>
 </div>
@@ -35,24 +35,21 @@ $def with(student, attempts, tests)
 			<th>Назва</th>
 			<th>Початок</th>
 			<th>Кінець</th>
-			<th>Прогрес</th>
 			<th>Результат</th>
-			<th>Дії</th>
 		</tr>
 		$for attempt in attempts:
+			$ progress = '{0:.2g}%'.format(float(attempt['answered'])/attempt['question_count']*100)
+			$if attempt['result']:
+				$ result = '{0}/{1}'.format(int(attempt['result']), attempt['question_count'])
 			<tr>
 				<td>$attempt['name']</td>
 				<td>$attempt['start']</td>
 				<td>$attempt['end']</td>
-				<td>$attempt['answered']/$attempt['question_count']</td>
-				<td>$attempt['result']</td>
 				<td>
 					$if not attempt['end']:
-						<a href="/test/continue?attempt_id=$attempt['attempt_id']&test_id=$attempt['test_id']">
-							Продовжити
-						</a>
+						Тест завершено на $progress, <a href="/test/continue?attempt_id=$attempt['attempt_id']&test_id=$attempt['test_id']">продовжити</a>?
 					$else:
-						<a href="#">Результат</a>
+						Результат: $result. <a href="#">Звіт...</a>
 				</td>
 			</tr>
 	</table>

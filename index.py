@@ -44,9 +44,5 @@ class login:
     def GET(self):
         return render.login()
 
-class hello:
-    def GET(self):
-        return 'Hello, {0}!'.format('Orest')
-
 if __name__ == '__main__':
     app.run()

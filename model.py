@@ -33,14 +33,11 @@ def get_student_test_attempts(student_id):
 def get_student_available_tests(student_id):
     c = get_cursor()
     c.execute('''SELECT DISTINCT (test.id), test.name AS name,
-        MAX(ta.result) AS result, COUNT(DISTINCT qsq.question_id) AS maxresult FROM test
+        MAX(ta.result) AS result, test.questionCount AS question_count
+        FROM test
         LEFT OUTER JOIN test_attempt ta ON ta.test_id = test.id
             AND ta.student_id = %s
-        INNER JOIN question_sequence qs
-            ON qs.test_id = test.id AND (qs.student_id = %s OR qs.student_id IS NULL)
-        INNER JOIN question_sequence_questions qsq
-            ON qsq.sequence_id = qs.id
-        GROUP BY test.id, qs.id''', (student_id, student_id))
+        GROUP BY test.id''', (student_id))
     return c.fetchall()
 
 def start_new_attempt(test_id, student_id):
