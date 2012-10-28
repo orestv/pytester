@@ -19,11 +19,15 @@ def get_student_info(id):
     return c.fetchone()
 def get_student_test_attempts(student_id):
     c = get_cursor()
-    c.execute('''SELECT t.id AS test_id, t.name, 
-        ta.id AS attempt_id, ta.start, ta.end, ta.result
+    c.execute('''SELECT t.id AS test_id, t.name,
+        ta.id AS attempt_id, ta.start, ta.end, ta.result,
+        COUNT(DISTINCT a.question_id) AS answered, t.questionCount AS question_count
         FROM test_attempt ta
         INNER join test t ON ta.test_id = t.id
+        LEFT OUTER JOIN student_answer sa ON sa.test_attempt_id = ta.id
+        LEFT OUTER JOIN answer a ON a.id = sa.answer_id
         WHERE ta.student_id = %s
+        GROUP BY t.id, t.name, ta.id, ta.start, ta.end, ta.result, t.questionCount
         ORDER BY ta.start DESC''', (student_id))
     return c.fetchall()
 def get_student_available_tests(student_id):

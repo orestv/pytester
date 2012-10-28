@@ -35,6 +35,7 @@ $def with(student, attempts, tests)
 			<th>Назва</th>
 			<th>Початок</th>
 			<th>Кінець</th>
+			<th>Прогрес</th>
 			<th>Результат</th>
 			<th>Дії</th>
 		</tr>
@@ -43,12 +44,15 @@ $def with(student, attempts, tests)
 				<td>$attempt['name']</td>
 				<td>$attempt['start']</td>
 				<td>$attempt['end']</td>
+				<td>$attempt['answered']/$attempt['question_count']</td>
 				<td>$attempt['result']</td>
 				<td>
 					$if not attempt['end']:
 						<a href="/test/continue?attempt_id=$attempt['attempt_id']&test_id=$attempt['test_id']">
-							Continue
+							Продовжити
 						</a>
+					$else:
+						<a href="#">Результат</a>
 				</td>
 			</tr>
 	</table>
