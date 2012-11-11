@@ -1,3 +1,5 @@
 *.pyc
 *.sublime*
+.tags*
+app.cfg
 sessions
