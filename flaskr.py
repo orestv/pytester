@@ -178,6 +178,3 @@ def questions():
         return render_template('questions.html',
             topic_id = topic_id,
             topic_name = topic_name)
-
-if __name__ == '__main__':
-    app.run(debug = True)
