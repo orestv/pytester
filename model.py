@@ -1,8 +1,20 @@
 import MySQLdb
+import ConfigParser
 import time
 
+config = ConfigParser.RawConfigParser()
+config.read('app.cfg')
+dbparams = {'host': config.get('Database', 'host'),
+    'db': config.get('Database', 'db'),
+    'user': config.get('Database', 'user'),
+    'passwd': config.get('Database', 'passwd') }
+
 def get_cursor():
-    db = MySQLdb.connect(host='server.mysql', db='orestv$tests', user='orestv', passwd='sdntvFreud', charset='utf8', use_unicode=True)
+    db = MySQLdb.connect(host=dbparams['host'],
+        db=dbparams['db'],
+        user=dbparams['user'],
+        passwd=dbparams['passwd'],
+        charset='utf8', use_unicode=True)
     return db.cursor(MySQLdb.cursors.DictCursor)
 
 def get_student_id(firstname, lastname):
