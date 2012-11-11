@@ -2,7 +2,7 @@ import MySQLdb
 import time
 
 def get_cursor():
-    db = MySQLdb.connect(host='server.mysql' db='orestv$tests', user='orestv', passwd='sdntvFreud', charset='utf8', use_unicode=True)
+    db = MySQLdb.connect(host='server.mysql', db='orestv$tests', user='orestv', passwd='sdntvFreud', charset='utf8', use_unicode=True)
     return db.cursor(MySQLdb.cursors.DictCursor)
 
 def get_student_id(firstname, lastname):
