@@ -51,6 +51,7 @@ function addQuestionRow(id, question) {
 function deleteQuestion(questionId) {
 	$.ajax({
 		url: '/admin/question',
+		type: 'POST',
 		data: {action: 'delete', question_id: questionId},
 		success: reloadQuestions
 	})

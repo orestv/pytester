@@ -1,7 +1,7 @@
-﻿$def with(topics)
-<html>
+﻿<html>
 <head>
 	<title>Панель адміністратора</title>
+	<link rel="stylesheet" href="static/styles.css">
 	<link rel="stylesheet" href="/static/admin_dashboard.css">
 	<script src="/static/jquery.js"></script>
 	<script src="/static/admin_dashboard.js"></script>
@@ -36,6 +36,7 @@
 	<div id="dvGenerateTest">
 		<h2>Створити тест</h2>
 		<form action="/admin/test" method="POST" id="frmCreateTest" onsubmit="btnCreateTest_clicked();return false">
+			<h3>Теми:</h3>
 			<ul id="ulTopics"></ul>
 			<table>
 				<tr>

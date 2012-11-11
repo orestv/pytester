@@ -12,6 +12,7 @@ div {
 	float: left;
 }
 #dvTests {
+	margin-left: 1cm;
 	width: 45%;
 	text-align: center;
 	float: left;

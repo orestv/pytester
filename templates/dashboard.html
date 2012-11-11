@@ -1,11 +1,10 @@
-$def with(student, attempts, tests)
 <html>
 <head>
 	<title>Домашня сторінка</title>
 	<link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-<h1>Вітаємо, $student['firstname']</h1>
+<h1>Вітаємо, {{ student['firstname'] }}</h1>
 <div class="dashboardBlock">
 	<h2>Доступні тести</h2>
 	<table>
@@ -14,17 +13,19 @@ $def with(student, attempts, tests)
 			<th>Кращий результат</th>
 			<th>Дії</th>
 		</tr>
-		$for test in tests:
+		{% for test in tests %}
 			<tr>
-				<td>$test['name']</td>
+				<td>{{ test['name'] }}</td>
 				<td>
-					$if test['result'] is None:
+					{% if not (test['result'] == None) %}
+						{{test['result']|int}} / {{test['question_count']}}
+					{% else %}
 						N/A
-					$else:
-						$int(test['result'])/$test['question_count']
+					{% endif %}
 				</td>
-				<td><a href="/test/start?test_id=$test['id']">Пройти</a></td>
+				<td><a href="/test?test_id={{test['id']}}">Пройти</a></td>
 			</tr>
+		{% endfor %}
 	</table>
 </div>
 
@@ -32,26 +33,29 @@ $def with(student, attempts, tests)
 	<h2>Попередні спроби</h2>
 	<table>
 		<tr>
-			<th>Назва</th>
+			<th>Тест</th>
 			<th>Початок</th>
 			<th>Кінець</th>
 			<th>Результат</th>
 		</tr>
-		$for attempt in attempts:
-			$ progress = '{0:.2g}%'.format(float(attempt['answered'])/attempt['question_count']*100)
-			$if attempt['result']:
-				$ result = '{0}/{1}'.format(int(attempt['result']), attempt['question_count'])
+		{% for attempt in attempts %}
+			{% set progress = '{0:.3g}%'.format(attempt['answered']/attempt['question_count']*100) %}
+			{% if attempt['result'] %}
+				{% set result = '{0}/{1}'.format(attempt['result'], attempt['question_count']) %}
+			{% endif %}
 			<tr>
-				<td>$attempt['name']</td>
-				<td>$attempt['start']</td>
-				<td>$attempt['end']</td>
+				<td>{{attempt['name']}}</td>
+				<td>{{attempt['start']}}</td>
+				<td>{{ 'N/A' if not attempt['end'] else attempt['end'] }}</td>
 				<td>
-					$if not attempt['end']:
-						Тест завершено на $progress, <a href="/test/continue?attempt_id=$attempt['attempt_id']&test_id=$attempt['test_id']">продовжити</a>?
-					$else:
-						Результат: $result. <a href="#">Звіт...</a>
+					{% if not attempt['end'] %}
+						Дано відповіді на {{progress}} питань, <a href="/test?continue=1&attempt_id={{attempt['attempt_id']}}&test_id={{attempt['test_id']}}">продовжити</a>?
+					{% else %}
+						{{result}} <a href="#">Звіт...</a>
+					{% endif %}
 				</td>
 			</tr>
+		{% endfor %}
 	</table>
 </div>
 

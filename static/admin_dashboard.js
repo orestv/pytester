@@ -10,12 +10,16 @@ function btnAddTopic_clicked() {
 	addTopic(name)
 }
 function btnCreateTest_clicked() {
+	if ($('#ulTopics input:checked').length == 0) {
+		alert('Виберіть хоча б одну тему')
+		return
+	}
 	var data = $('#frmCreateTest').serialize()
 	$.ajax({
 		url: '/admin/test',
 		data: data,
 		type: 'POST',
-		success: testGenerated
+		success: createHandler(reloadTests)
 	})
 }
 
@@ -49,7 +53,7 @@ function addTestRow(test) {
 	var id = test['id'], name = test['name'],
 		final = Boolean(test['final'])
 	var tdName = $('<td>').text(name)
-	var tdFinal = $('<td>').text(test['final'])
+	var tdFinal = $('<td>').text(test['final'] == '1' ? 'Так' : 'Ні')
 	var tdActions = $('<td>')
 
 	var btnDelete = $('<input>')
@@ -132,7 +136,7 @@ function deleteTopic(id, name) {
 		url: '/admin/topic',
 		data: {action: 'delete', id: id},
 		type: 'POST',
-		success: reloadTopics
+		success: createHandler(reloadTopics)
 	})
 }
 function deleteTest(id, name) {
@@ -142,7 +146,7 @@ function deleteTest(id, name) {
 		url: '/admin/test',
 		data: {action: 'delete', id: id},
 		type: 'POST',
-		success: reloadTests
+		success: createHandler(reloadTests)
 	})
 }
 function addTopic(name) {
@@ -150,7 +154,7 @@ function addTopic(name) {
 		url: '/admin/topic',
 		data: {action: 'add', name: name},
 		type: 'POST',
-		success: reloadTopics
+		success: createHandler(reloadTopics)
 	})
 }
 function renameTopic(id, name) {
@@ -158,10 +162,16 @@ function renameTopic(id, name) {
 		url: '/admin/topic',
 		data: {action: 'rename', id: id, name: name},
 		type: 'POST',
-		success: reloadTopics
+		success: createHandler(reloadTopics)
 	})
 }
 
-function testGenerated() {
-	reloadTests()
+function createHandler(func) {
+	return function(data) {
+		if (data == 'login_fail') {
+			window.location.href = '/admin'
+			return
+		}
+		func()
+	}
 }

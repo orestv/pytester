@@ -18,13 +18,14 @@ function updateAnswer(questionId) {
 	for (var i = 0; i < inputs.length; i++)
 		if (inputs[i].checked)
 			ansIDs += inputs[i].value + ','
-	var url = 'answerHandler'
+	var url = 'update_answers'
 	var params = 'question_id='+questionId+'&attempt_id='+attemptId+'&answers='+ansIDs
 	var request = createRequest()
 	request.open('POST', url, true)
 	request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	request.onreadystatechange = function() {
 		if (request.readyState == 4)
+			window.requestCount--;
 			submitEnable()
 	}
 	request.send(params)
@@ -32,15 +33,14 @@ function updateAnswer(questionId) {
 }
 
 function submitEnable() {
-	window.requestCount--
 	if (window.requestCount == 0)
-		$('#btnSubmit').removeAttr('disabled')
+		$('#btnSubmit').removeAttr('disabled').attr('value', 'Зберегти')
 	var hidFinished = document.getElementById('finished')
 	hidFinished.value = (allQuestionsAnsweredCheck() ? '1' : '0')
 }
 function submitDisable() {
 	if (window.requestCount == 0)
-		$('#btnSubmit').attr('disabled', 'disabled')
+		$('#btnSubmit').attr('disabled', 'disabled').attr('value', 'Зберігаю...')
 	window.requestCount++
 }
 function allQuestionsAnsweredCheck() {
@@ -58,8 +58,11 @@ function submitStateUpdate() {
 		if ($(this).find('input:checked').size() == 0)
 			canSubmit = false;
 	})
-	if (canSubmit)
+	if (canSubmit) {
 		$('#btnSubmit').removeAttr('disabled')
-	else
+	} else {
 		$('#btnSubmit').attr('disabled', 'disabled')
+	}
+	var hidFinished = document.getElementById('finished')
+	hidFinished.value = (allQuestionsAnsweredCheck() ? '1' : '0')
 }

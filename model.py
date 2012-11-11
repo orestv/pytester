@@ -5,10 +5,17 @@ def get_cursor():
     db = MySQLdb.connect(db='tests', user='root', passwd='sdntvFreud', charset='utf8', use_unicode=True)
     return db.cursor(MySQLdb.cursors.DictCursor)
 
-def get_student(firstname, lastname):
+def get_student_id(firstname, lastname):
     c = get_cursor()
-    c.execute('SELECT id, hash FROM student WHERE firstname = %s AND lastname = %s', (firstname, lastname))
-    return c.fetchone()
+    c.execute('SELECT id FROM student WHERE firstname = %s AND lastname = %s', (firstname, lastname))
+    result = c.fetchone()
+    if result:
+        return int(result['id'])
+    else:
+        c.execute('INSERT INTO student (firstname, lastname) VALUES (%s, %s)',
+            (firstname, lastname))
+        return c.lastrowid
+
 def get_students():
     c = get_cursor()
     c.execute('''SELECT id, firstname, lastname, hash FROM student''')
@@ -20,7 +27,7 @@ def get_student_info(id):
 def get_student_test_attempts(student_id):
     c = get_cursor()
     c.execute('''SELECT t.id AS test_id, t.name,
-        ta.id AS attempt_id, ta.start, ta.end, ta.result,
+        ta.id AS attempt_id, ta.start, ta.end, CAST(ta.result AS UNSIGNED) AS result,
         COUNT(DISTINCT a.question_id) AS answered, t.questionCount AS question_count
         FROM test_attempt ta
         INNER join test t ON ta.test_id = t.id
@@ -210,6 +217,8 @@ def upload_questions(topic_id, questions):
         multiselect = len(filter(lambda x : x.startswith('*'), answers)) > 1    #count correct answers
         question_id = add_question(topic_id, question_text, question_comment, multiselect)
         for answer_text in answers:
+            if not answer_text.strip():
+                continue
             correct = answer_text.startswith('*')
             if correct:
                 answer_text = answer_text.lstrip('*')
@@ -225,7 +234,7 @@ def delete_test(test_id):
         FROM test t
         LEFT OUTER JOIN test_attempt ta ON t.id = ta.test_id
         LEFT OUTER JOIN question_sequence qs ON t.id = qs.test_id
-        LEFT OUTER JOIN question_sequence_questions qsq ON qs.id = qs.sequence_id
+        LEFT OUTER JOIN question_sequence_questions qsq ON qs.id = qsq.sequence_id
         WHERE t.id = %s''',
         (test_id))
 def rename_test(test_id, test_name):
