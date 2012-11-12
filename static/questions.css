@@ -1,6 +1,12 @@
 .correct {
 	color: green;
 }
+.incorrect {
+	color: red;
+}
+.selected {
+	font-weight: bold;
+}
 
 #tblQuestions {
 	width: 80%
