@@ -51,7 +51,7 @@ def test():
     else:
         attempt_id = model.start_new_attempt(test_id, student_id)
         return redirect('/test?continue=1&test_id=%s&attempt_id=%s'%(test_id, attempt_id))
-    questions = model.get_questions_for_test(test_id, student_id, attempt_id)
+    questions = model.get_questions_for_test(attempt_id)
     return render_template('test.html',
         test_name = 'Test name stub',
         attempt_id = attempt_id,

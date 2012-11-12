@@ -1,6 +1,6 @@
 function bodyLoaded() {
-	submitStateUpdate()
 	window.requestCount = 0
+	submitEnable()
 }
 
 function createRequest() {
@@ -33,10 +33,13 @@ function updateAnswer(questionId) {
 }
 
 function submitEnable() {
-	if (window.requestCount == 0)
+	if (window.requestCount == 0) {
 		$('#btnSubmit').removeAttr('disabled').attr('value', 'Зберегти')
-	var hidFinished = document.getElementById('finished')
-	hidFinished.value = (allQuestionsAnsweredCheck() ? '1' : '0')
+		var hidFinished = document.getElementById('finished')
+		var finished = allQuestionsAnsweredCheck()
+		hidFinished.value = (finished ? '1' : '0')
+		$('#btnSubmit').attr('value', finished ? 'Завершити' : 'Зберегти')
+	}
 }
 function submitDisable() {
 	if (window.requestCount == 0)
@@ -50,19 +53,4 @@ function allQuestionsAnsweredCheck() {
 			answered = false;
 	})
 	return answered
-}
-
-function submitStateUpdate() {
-	var canSubmit = true
-	$('td[name=questionContainer]').each(function(index, value) {
-		if ($(this).find('input:checked').size() == 0)
-			canSubmit = false;
-	})
-	if (canSubmit) {
-		$('#btnSubmit').removeAttr('disabled')
-	} else {
-		$('#btnSubmit').attr('disabled', 'disabled')
-	}
-	var hidFinished = document.getElementById('finished')
-	hidFinished.value = (allQuestionsAnsweredCheck() ? '1' : '0')
 }

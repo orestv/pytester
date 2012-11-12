@@ -82,6 +82,37 @@ def get_attempt_result(attempt_id):
     questions = get_questions_for_attempt(attempt_id)
     results = [get_question_result(attempt_id, q['id']) for q in questions]
     return sum(results)
+def get_attempt_report(attempt_id):
+    c = get_cursor()
+    c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, q.comment,
+            a.id AS ans_id, a.text AS ans_text, 
+            NOT ISNULL(sa.id) AS ans_selected, ans.correct AS correct
+        FROM question_sequence qs
+        INNER JOIN question_sequence_questions qsq
+            ON qs.id = qsq.sequence_id
+        INNER join question q
+            ON qsq.question_id = q.id
+        INNER JOIN answer a
+            ON a.question_id = q.id
+        INNER JOIN test_attempt ta
+            ON ta.id = %s
+        LEFT OUTER JOIN student_answer sa
+            ON sa.test_attempt_id = ta.id AND sa.answer_id = a.id
+        WHERE qs.test_id = ta.test_id AND (qs.student_id = ta.student_id OR ISNULL(qs.student_id) = 1)
+        ORDER BY qsq.order ASC;''', (attempt_id))
+    rows = c.fetchall()
+    questions = merge_answers(rows, \
+        {x:x for x in ['text', 'comment']}, \
+        {'id':'ans_id', 'text':'ans_text', 'correct':'correct', 'selected':'ans_selected'})
+    return questions
+
+def merge_answers(rows, question_captions, answer_captions):
+    questions = {row['id']: {name: row[key] for name, key in question_captions.iteritems()} for row in rows}
+    for id, question in questions.iteritems():
+        answers = filter(lambda row : row['id'] == id, rows)
+        answers = [{name: ans[key] for name, key in answer_captions.iteritems()} for ans in answers]
+        question['answers'] = answers
+    return questions
 
 def get_question_result(attempt_id, question_id):
     c = get_cursor()
@@ -99,6 +130,8 @@ def get_question_result(attempt_id, question_id):
     ) THEN 0 ELSE 1 END AS correct''',
     (attempt_id, question_id))
     return int(c.fetchone()['correct'])
+def get_question_answers(attempt_id, question_id):
+    pass
 
 def get_questions_for_attempt(attempt_id):
     c = get_cursor()
@@ -114,7 +147,7 @@ def get_questions_for_attempt(attempt_id):
         WHERE ta.id = %s''',
         (attempt_id))
     return c.fetchall()
-def get_questions_for_test(test_id, student_id, attempt_id):
+def get_questions_for_test(attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,
             a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected
@@ -125,23 +158,16 @@ def get_questions_for_test(test_id, student_id, attempt_id):
             ON qsq.question_id = q.id
         INNER JOIN answer a
             ON a.question_id = q.id
+        INNER JOIN test_attempt ta
+            ON ta.id = %s
         LEFT OUTER JOIN student_answer sa
-            ON sa.student_id = %s AND sa.test_attempt_id = %s AND sa.answer_id = a.id
-        WHERE qs.test_id = %s AND (qs.student_id = %s OR ISNULL(qs.student_id) = 1)
-        ORDER BY qsq.order ASC;''', (student_id, attempt_id, test_id, student_id))
+            ON sa.test_attempt_id = ta.id AND sa.answer_id = a.id
+        WHERE qs.test_id = ta.test_id AND (qs.student_id = ta.student_id OR ISNULL(qs.student_id) = 1)
+        ORDER BY qsq.order ASC;''', (attempt_id))
     rows = c.fetchall()
-    result = {}
-    for row in rows:
-        id = row['id']
-        answer = {'id': row['ans_id'],
-                'text': row['ans_text'],
-                'selected': row['ans_selected']}
-        if id in result:
-            result[id]['answers'].append(answer)
-        else:
-            result[id] = {'text': row['text'],
-                        'multiselect': row['multiselect'],
-                        'answers': [answer]}
+    result = merge_answers(rows, \
+        {x:x for x in ['text', 'multiselect']}, \
+        {'id':'ans_id', 'text':'ans_text','selected':'ans_selected'})
     return result
 def get_questions_for_topic(topic_id):
     c = get_cursor()
@@ -151,20 +177,10 @@ def get_questions_for_topic(topic_id):
         INNER JOIN answer a ON q.id = a.question_id
         WHERE q.topic_id = %s;''', (topic_id))
     rows = c.fetchall()
-    result = {}
-    for row in rows:
-        id = row['id']
-        answer = {'id': row['ans_id'],
-                'text': row['ans_text'],
-                'correct': row['correct']}
-        if id in result:
-            result[id]['answers'].append(answer)
-        else:
-            result[id] = {'text': row['text'],
-                        'multiselect': row['multiselect'],
-                        'comment': row['comment'],
-                        'answers': [answer]}
-    return result
+    questions = merge_answers(rows, \
+        {x:x for x in ['text', 'multiselect', 'comment']}, \
+        {'id': 'ans_id', 'text': 'ans_text', 'correct': 'correct'})
+    return questions
 
 def update_answers(student_id, attempt_id, question_id, answers):
     c = get_cursor()
