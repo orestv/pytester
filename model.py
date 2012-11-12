@@ -8,14 +8,15 @@ dbparams = {'host': config.get('Database', 'host'),
     'db': config.get('Database', 'db'),
     'user': config.get('Database', 'user'),
     'passwd': config.get('Database', 'passwd') }
-
-def get_cursor():
-    db = MySQLdb.connect(host=dbparams['host'],
+conn = MySQLdb.connect(host=dbparams['host'],
         db=dbparams['db'],
         user=dbparams['user'],
         passwd=dbparams['passwd'],
         charset='utf8', use_unicode=True)
-    return db.cursor(MySQLdb.cursors.DictCursor)
+
+def get_cursor():
+    conn.ping()
+    return conn.cursor(MySQLdb.cursors.DictCursor)
 
 def get_student_id(firstname, lastname):
     c = get_cursor()
