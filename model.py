@@ -15,7 +15,14 @@ conn = MySQLdb.connect(host=dbparams['host'],
         charset='utf8', use_unicode=True)
 
 def get_cursor():
-    conn.ping()
+    try:
+        conn.ping()
+    except:
+        conn = MySQLdb.connect(host=dbparams['host'],
+            db=dbparams['db'],
+            user=dbparams['user'],
+            passwd=dbparams['passwd'],
+            charset='utf8', use_unicode=True)
     return conn.cursor(MySQLdb.cursors.DictCursor)
 
 def get_student_id(firstname, lastname):
