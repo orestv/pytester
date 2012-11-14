@@ -17,13 +17,16 @@ def is_admin():
 @app.route('/', methods=['GET', 'POST'])
 def root():
     if request.method == 'GET':
-        return render_template('login.html')
+        if not loggedin():
+            return render_template('login.html')
+        else:
+            return redirect(url_for('dashboard'))
     else:
         firstname = request.form['firstname']
         lastname = request.form['lastname']
         student_id = model.get_student_id(firstname, lastname)
         session['student_id'] = student_id
-        return redirect(url_for('dashboard'))
+        return redirect('/')
 
 @app.route('/dashboard')
 def dashboard():
@@ -43,8 +46,8 @@ def test():
     if not loggedin():
         return redirect('/')
     if not 'test_id' in request.args:
-        return redirect(url_for('dashboard'))
-    test_id = request.args.get('test_id')
+        return redirect('/')
+    test_id = request.args['test_id']
     student_id = session['student_id']
     if 'continue' in request.args and 'attempt_id' in request.args:
         attempt_id = request.args.get('attempt_id')
@@ -56,6 +59,15 @@ def test():
         test_name = 'Test name stub',
         attempt_id = attempt_id,
         questions = questions)
+@app.route('/report')
+def report():
+    if not loggedin():
+        return redirect('/')
+    if not 'attempt_id' in request.args:
+        return redirect('/')
+    attempt_id = request.args['attempt_id']
+    student_id = session['student_id']
+
 
 @app.route('/end_test', methods=['POST'])
 def end_test():
