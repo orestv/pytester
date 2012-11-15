@@ -51,7 +51,7 @@
 					{% if not attempt['end'] %}
 						Дано відповіді на {{progress}} питань, <a href="/test?continue=1&attempt_id={{attempt['attempt_id']}}&test_id={{attempt['test_id']}}">продовжити</a>?
 					{% else %}
-						{{result}} <a href="#">Звіт...</a>
+						{{result}} <a href="/attempt_report?attempt_id={{attempt['attempt_id']}}">Звіт...</a>
 					{% endif %}
 				</td>
 			</tr>
