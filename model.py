@@ -1,6 +1,8 @@
 import MySQLdb
 import ConfigParser
 import time
+import chardet
+import re
 
 config = ConfigParser.RawConfigParser()
 config.read('app.cfg')
@@ -238,9 +240,16 @@ def add_answer(question_id, text, correct):
             VALUES (%s, %s, %s);''', (question_id, text, correct))
 
 def upload_questions(topic_id, questions):
+    detection = chardet.detect(questions)
+    encoding = detection.get('encoding') or 'utf-8'
+    questions = unicode(questions, encoding)
     lb = detect_linebreaks(questions)
-    questions = questions.split(lb+lb+lb)
+    pattern = '{0}({0})+'.format(lb)
+    questions = re.split(pattern, questions)
     for block in questions:
+        block = block.strip()
+        if not block:
+            continue
         rows = block.split(lb)
         question_text = rows[0]
         if question_exists(topic_id, question_text):
