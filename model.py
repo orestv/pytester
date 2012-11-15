@@ -61,12 +61,20 @@ def get_student_test_attempts(student_id):
     return c.fetchall()
 def get_student_available_tests(student_id):
     c = get_cursor()
-    c.execute('''SELECT DISTINCT (test.id), test.name AS name,
-        MAX(ta.result) AS result, test.questionCount AS question_count
+    c.execute('''SELECT test.id, test.name AS name,
+        ta.result AS result, ta.id AS attempt_id, test.questionCount AS question_count
         FROM test
-        LEFT OUTER JOIN test_attempt ta ON ta.test_id = test.id
-            AND ta.student_id = %s
-        GROUP BY test.id''', (student_id))
+        LEFT OUTER JOIN (
+            SELECT id, ta_.test_id, ta_.student_id, ta_.result FROM test_attempt ta_
+            INNER JOIN (
+                SELECT test_id, student_id, MAX(result) AS result
+                    FROM test_attempt
+                    GROUP BY test_attempt.test_id, test_attempt.student_id
+            ) tt ON ta_.test_id = tt.test_id
+                AND ta_.student_id = tt.student_id
+                AND ta_.result = tt.result
+            GROUP BY ta_.test_id, ta_.student_id, ta_.result
+        ) ta ON ta.test_id = test.id AND ta.student_id = %s''', (student_id))
     return c.fetchall()
 
 def start_new_attempt(test_id, student_id):
@@ -94,8 +102,8 @@ def get_attempt_result(attempt_id):
 def get_attempt_report(attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, q.comment,
-            a.id AS ans_id, a.text AS ans_text, 
-            NOT ISNULL(sa.id) AS ans_selected, ans.correct AS correct
+            a.id AS ans_id, a.text AS ans_text,
+            NOT ISNULL(sa.id) AS ans_selected, a.correct AS correct
         FROM question_sequence qs
         INNER JOIN question_sequence_questions qsq
             ON qs.id = qsq.sequence_id
@@ -111,7 +119,7 @@ def get_attempt_report(attempt_id):
         ORDER BY qsq.order ASC;''', (attempt_id))
     rows = c.fetchall()
     questions = merge_answers(rows, \
-        {x:x for x in ['text', 'comment']}, \
+        {x:x for x in ['text', 'comment', 'multiselect']}, \
         {'id':'ans_id', 'text':'ans_text', 'correct':'correct', 'selected':'ans_selected'})
     return questions
 

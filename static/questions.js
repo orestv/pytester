@@ -9,20 +9,19 @@ function loadQuestions(questions) {
 	$('#tblQuestions tr:gt(0)').remove()
 	var questionCount = 0
 	for (var id in questions) {
-		addQuestionRow(id, questions[id], true)
+		addQuestionRow(id, questions[id])
 		questionCount++
 	}
 	$('#spQuestionCount').text(questionCount)
 }
-function addQuestionRow(id, question, includeActions) {
+function addQuestionRow(id, question) {
 	var text = question['text'],
 		multiselect = question['multiselect'],
 		comment = question['comment']
 	var tdQuestion = $('<td>').text(text)
 	var tdAnswers = $('<td>')
 	var tdComment = $('<td>').text(comment != null ? comment : '')
-	if (includeActions)
-		var tdActions = $('<td>')
+	var tdActions = $('<td>')
 
 	var ulAnswers = $('<ul>')
 	for (var i = 0; i < question.answers.length; i++) {
@@ -30,22 +29,17 @@ function addQuestionRow(id, question, includeActions) {
 		var liAnswer = $('<li>').text(ans.text)
 		if (ans.correct == 1)
 			liAnswer.addClass('correct')
-		if (ans.selected == 1)
-			liAnswer.addClass('selected')
-		if (ans.correct != 1 && ans.selected == 1)
-			liAnswer.addClass('incorrect')
 		ulAnswers.append(liAnswer)
 	}
 	tdAnswers.append(ulAnswers)
-	if (includeActions)
-		tdActions.append($('<input>')
-			.attr('type', 'button')
-			.attr('value', 'Видалити')
-			.click(function() {
-				if (!confirm('Ви впевнені, що хочете видалити це питання?'))
-					return
-				deleteQuestion(id)
-			}))
+	tdActions.append($('<input>')
+		.attr('type', 'button')
+		.attr('value', 'Видалити')
+		.click(function() {
+			if (!confirm('Ви впевнені, що хочете видалити це питання?'))
+				return
+			deleteQuestion(id)
+		}))
 
 	$('#tblQuestions').find('tbody')
 		.append($('<tr>')
