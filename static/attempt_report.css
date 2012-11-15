@@ -1,0 +1,16 @@
+#tblQuestions span {
+	display: list-item;
+	list-style-type: none;
+}
+.ans_correct {
+	font-weight: bold;
+}
+.ans_wrong {
+	text-decoration: line-through;
+}
+.question_correct {
+	color: green;
+}
+.question_wrong {
+	color: red;
+}

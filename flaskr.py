@@ -59,15 +59,20 @@ def test():
         test_name = 'Test name stub',
         attempt_id = attempt_id,
         questions = questions)
-@app.route('/report')
-def report():
-    if not loggedin():
-        return redirect('/')
+@app.route('/attempt_report')
+def attempt_report():
+    is_json = request.args.get('json', False)
+    if not loggedin() and not is_admin():
+        return 'login_fail' if is_json else redirect('/')
     if not 'attempt_id' in request.args:
         return redirect('/')
     attempt_id = request.args['attempt_id']
-    student_id = session['student_id']
-
+    if is_json:
+        return json.dumps(model.get_attempt_report(attempt_id))
+    else:
+        return render_template('attempt_report.html',
+            test_name = 'Test name stub',
+            attempt_id = attempt_id)
 
 @app.route('/end_test', methods=['POST'])
 def end_test():
@@ -178,10 +183,7 @@ def tests():
 def questions():
     is_json = request.args.get('json', False)
     if not is_admin():
-        if is_json:
-            return 'login_fail'
-        else:
-            return redirect(url_for('admin'))
+        return 'login_fail' if is_json else redirect(url_for('admin'))
     topic_id = request.args['topic_id']
     if is_json:
         return json.dumps(model.get_questions_for_topic(topic_id))

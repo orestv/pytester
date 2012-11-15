@@ -94,8 +94,8 @@ def get_attempt_result(attempt_id):
 def get_attempt_report(attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, q.comment,
-            a.id AS ans_id, a.text AS ans_text, 
-            NOT ISNULL(sa.id) AS ans_selected, ans.correct AS correct
+            a.id AS ans_id, a.text AS ans_text,
+            NOT ISNULL(sa.id) AS ans_selected, a.correct AS correct
         FROM question_sequence qs
         INNER JOIN question_sequence_questions qsq
             ON qs.id = qsq.sequence_id
@@ -111,7 +111,7 @@ def get_attempt_report(attempt_id):
         ORDER BY qsq.order ASC;''', (attempt_id))
     rows = c.fetchall()
     questions = merge_answers(rows, \
-        {x:x for x in ['text', 'comment']}, \
+        {x:x for x in ['text', 'comment', 'multiselect']}, \
         {'id':'ans_id', 'text':'ans_text', 'correct':'correct', 'selected':'ans_selected'})
     return questions
 
