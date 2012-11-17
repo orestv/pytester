@@ -173,12 +173,25 @@ def upload_questions():
     model.upload_questions(topic_id, questions)
     return redirect('/admin/questions?topic_id=%(id)s' % {'id': topic_id})
 
+@app.route('/admin/test_report/<int:test_id>')
+def test_report(test_id):
+    if not is_admin():
+        return redirect(url_for('admin'))
+    test = model.get_test(test_id)
+    results = model.get_test_report(test_id)
+    return render_template('test_report.html',
+        test_name = test['name'],
+        results = results)
+
 @app.route('/admin/topics')
 def topics():
     return json.dumps(model.get_topics())
 @app.route('/admin/tests')
 def tests():
     return json.dumps(model.get_tests())
+@app.route('/admin/students')
+def students():
+    return json.dumps(model.get_students())
 @app.route('/admin/questions')
 def questions():
     is_json = request.args.get('json', False)

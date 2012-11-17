@@ -21,6 +21,9 @@
 				<td></td>
 				<td><input type="button" onclick="btnAddTopic_clicked()" value="Додати"/></td>
 			</tr>
+			<tr>
+				<td colspan="3"><hr/></td>
+			</tr>
 		</table>
 	</div>
 	<div id="dvTests">
@@ -28,11 +31,11 @@
 		<table id="tblTests">
 			<tr>
 				<th>Назва</th>
-				<th>Фінальний</th>
 				<th>Дії</th>
 			</tr>
 		</table>
 	</div>
+	<div style="clear: both;"></div>
 	<div id="dvGenerateTest">
 		<h2>Створити тест</h2>
 		<form action="/admin/test" method="POST" id="frmCreateTest" onsubmit="btnCreateTest_clicked();return false">
@@ -52,13 +55,22 @@
 					</td>
 				</tr>
 				<tr>
-					<td><label for="chkFinal">Фінальний</label></td>
+					<td><label for="chkFinal">Підсумковий</label></td>
 					<td><input type="checkbox" id="chkFinal" name="final" value="True"></td>
 				</tr>
 			</table>
 			<input type="submit" value="Створити">
 			<input type="hidden" name="action" value="add">
 		</form>
+	</div>
+	<div id="dvStudents">
+		<h2>Студенти</h2>
+		<table id="tblStudents">
+			<tr>
+				<th>Ім'я</th>
+				<th>Дії</th>
+			</tr>
+		</table>
 	</div>
 	<!-- <input type="button" value="Reload topics" onclick="reloadTopics();"/> -->
 </body>
