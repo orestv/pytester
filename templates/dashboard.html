@@ -18,7 +18,10 @@
 				<td>{{ test['name'] }}</td>
 				<td>
 					{% if not (test['result'] == None) %}
-						{{test['result']|int}} / {{test['question_count']}}
+						{{test['result']|int}} / {{test['question_count']}}&nbsp;
+						<a href="/attempt_report?attempt_id={{test['attempt_id']}}">
+							(звіт)
+						</a>
 					{% else %}
 						N/A
 					{% endif %}
