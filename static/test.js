@@ -1,6 +1,7 @@
 function bodyLoaded() {
 	window.requestCount = 0
 	submitEnable()
+	answeredQuestionsMark()
 }
 
 function createRequest() {
@@ -30,6 +31,7 @@ function updateAnswer(questionId) {
 	}
 	request.send(params)
 	submitDisable();
+	answeredQuestionsMark()
 }
 
 function submitEnable() {
@@ -49,12 +51,16 @@ function submitDisable() {
 function allQuestionsAnsweredCheck() {
 	var answered = true
 	$('td[name=questionContainer]').each(function(index, value) {
-		if ($(this).find('input:checked').size() == 0) {
+		if ($(this).find('input:checked').size() == 0)
 			answered = false;
-			$(this).parent().removeClass('answered')
-		} else {
-			$(this).parent().addClass('answered')
-		}
 	})
 	return answered
+}
+function answeredQuestionsMark() {
+	$('td[name=questionContainer]').each(function(index, value) {
+		if ($(this).find('input:checked').size() == 0)
+			$(this).parent().removeClass('answered')
+		else
+			$(this).parent().addClass('answered')
+	})
 }
