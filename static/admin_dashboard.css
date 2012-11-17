@@ -18,7 +18,11 @@ div {
 	float: left;
 }
 #dvGenerateTest {
-	clear: both;
+	float: left;
+	width: 45%;
+}
+#dvStudents {
+	float: left;
 }
 #tblTopics {
 	width: 100%;

@@ -1,6 +1,7 @@
 function bodyLoaded() {
 	reloadTopics()
 	reloadTests()
+	reloadStudents()
 }
 
 function btnAddTopic_clicked() {
@@ -27,18 +28,24 @@ function reloadTests() {
 	clearTests()
 	$.getJSON('/admin/tests?rnd=' + Math.random(), loadTests)
 }
-
 function reloadTopics() {
 	clearTopics()
 	$.getJSON('/admin/topics?rnd=' + Math.random(), loadTopics)
+}
+function reloadStudents() {
+	clearStudents();
+	$.getJSON('/admin/students?rnd=' + Math.random(), loadStudents)
 }
 
 function clearTests() {
 	$('#tblTests tr:gt(0)').remove()
 }
 function clearTopics() {
-	$('#tblTopics tr:gt(1)').remove()
+	$('#tblTopics tr:gt(2)').remove()
 	$('#ulTopics li').remove()
+}
+function clearStudents() {
+	$('#tblStudents tr:gt(0)').remove()
 }
 
 function loadTests(tests) {
@@ -48,6 +55,10 @@ function loadTests(tests) {
 function loadTopics(topics) {
 	for (var i = 0; i < topics.length; i++)
 		addTopicRow(topics[i])
+}
+function loadStudents(students) {
+	for (var i = 0; i < students.length; i++)
+		addStudentRow(students[i])
 }
 function addTestRow(test) {
 	var id = test['id'], name = test['name'],
@@ -107,6 +118,14 @@ function addTopicRow(topic) {
 	$('#ulTopics').append($('<li>')
 		.append(topicInput)
 		.append(topicLabel))
+}
+function addStudentRow(student) {
+	var id = student['id']
+	var name = student['firstname'] + ' ' + student['lastname']
+	var tdName = $('<td>').append(name)
+	var tdActions = $('<td>')
+	$('#tblStudents').find('tbody')
+		.append($('<tr>').append(tdName).append(tdActions))
 }
 
 function topicRenamePrepare(id, name) {

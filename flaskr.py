@@ -179,6 +179,9 @@ def topics():
 @app.route('/admin/tests')
 def tests():
     return json.dumps(model.get_tests())
+@app.route('/admin/students')
+def students():
+    return json.dumps(model.get_students())
 @app.route('/admin/questions')
 def questions():
     is_json = request.args.get('json', False)
