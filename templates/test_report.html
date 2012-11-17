@@ -14,11 +14,12 @@
 		{%for result in results%}
 		<tr>
 			<td>
-				{{result['firstname']+' '+result['lastname']}}
+				{{result['lastname']+' '+result['firstname']}}
 			</td>
 			<td>
 				{%if result['result']%}
 					{{result['result']}}/{{result['maxResult']}}
+					(<a href="/attempt_report?attempt_id={{result['attempt_id']}}">звіт</a>)
 				{%else%}
 					-
 				{%endif%}

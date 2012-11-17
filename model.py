@@ -88,14 +88,25 @@ def get_test_for_attempt(attempt_id):
     return c.fetchone()
 def get_test_report(test_id):
     c = get_cursor()
-    c.execute('''SELECT firstname, lastname,
+    c.execute('''SELECT firstname, lastname, ta.id AS attempt_id,
         MAX(result) AS result, t.questionCount AS maxResult,
-        COUNT(ta.id) AS attemptCount
+        ta.attempt_count AS attemptCount
         FROM student s
         INNER JOIN test t ON t.id = %s
-        LEFT OUTER JOIN test_attempt ta
-            ON s.id = ta.student_id AND ta.test_id = t.id
-        GROUP BY s.id;''',
+        LEFT OUTER JOIN (
+            SELECT id, ta_.test_id, ta_.student_id, ta_.result, tt.attempt_count FROM test_attempt ta_
+            INNER JOIN (
+                SELECT test_id, student_id, 
+                    MAX(result) AS result, COUNT(test_attempt.id) AS attempt_count
+                FROM test_attempt
+                GROUP BY test_attempt.test_id, test_attempt.student_id
+            ) tt ON ta_.test_id = tt.test_id
+                AND ta_.student_id = tt.student_id
+                AND ta_.result = tt.result
+            GROUP BY ta_.test_id, ta_.student_id, ta_.result
+        ) ta ON ta.student_id = s.id AND ta.test_id = t.id
+        GROUP BY s.id
+        ORDER BY lastname, firstname;''',
         (test_id))
     return c.fetchall()
 
