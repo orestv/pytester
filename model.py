@@ -3,6 +3,7 @@ import ConfigParser
 import time
 import chardet
 import re
+import random
 
 config = ConfigParser.RawConfigParser()
 config.read('app.cfg')
@@ -146,12 +147,26 @@ def get_attempt_report(attempt_id):
         {'id':'ans_id', 'text':'ans_text', 'correct':'correct', 'selected':'ans_selected'})
     return questions
 
+def unique(ls):
+    result = []
+    seen = {}
+    for item in ls:
+        if item in seen:
+            continue
+        seen[item] = 1
+        result.append(item)
+    return result
+
 def merge_answers(rows, question_captions, answer_captions):
-    questions = {row['id']: {name: row[key] for name, key in question_captions.iteritems()} for row in rows}
-    for id, question in questions.iteritems():
-        answers = filter(lambda row : row['id'] == id, rows)
-        answers = [{name: ans[key] for name, key in answer_captions.iteritems()} for ans in answers]
+    qids = unique([row['id'] for row in rows])
+    questions = []
+    for qid in qids:
+        qs = filter(lambda row : row['id'] == qid, rows)
+        question = {name: qs[0][key] for name, key in question_captions.iteritems()}
+        question['id'] = qs[0]['id']
+        answers = [{name: q[key] for name, key in answer_captions.iteritems()} for q in qs]
         question['answers'] = answers
+        questions.append(question)
     return questions
 
 def get_question_result(attempt_id, question_id):
@@ -184,13 +199,14 @@ def get_questions_for_attempt(attempt_id):
         INNER JOIN test_attempt ta
             ON ta.test_id = qs.test_id
             AND (ISNULL(qs.student_id) = 1 OR qs.student_id = ta.student_id)
-        WHERE ta.id = %s''',
+        WHERE ta.id = %s
+        ORDER BY qsq.order ASC''',
         (attempt_id))
     return c.fetchall()
 def get_questions_for_test(attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,
-            a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected
+            a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected, qsq.order AS `order`
         FROM question_sequence qs
         INNER JOIN question_sequence_questions qsq
             ON qs.id = qsq.sequence_id
@@ -334,26 +350,31 @@ def add_test(name, topic_ids, question_count, final):
         c.execute('''INSERT INTO test_topics (test_id, topic_id)
             VALUES (%s, %s)''',
             (test_id, topic_id))
+    topic_ids_string = ','.join(map(lambda x:str(x), topic_ids))
+    c.execute('SELECT id FROM question WHERE topic_id IN (' + topic_ids_string + ')')
+    question_ids = c.fetchall()
+    question_ids = [q['id'] for q in question_ids]
     if final:
         students = get_students()
         for student in students:
-            add_question_sequence(student['id'], test_id, topic_ids, question_count)
+            add_question_sequence(student['id'], test_id, question_ids, question_count)
     else:
-        add_question_sequence(None, test_id, topic_ids, question_count)
+        add_question_sequence(None, test_id, question_ids, question_count)
 
-def add_question_sequence(student_id, test_id, topic_ids, question_count):
+def add_question_sequence(student_id, test_id, question_ids, question_count):
     c = get_cursor()
     c.execute('''INSERT INTO question_sequence (student_id, test_id)
         VALUES (%s, %s)''', (student_id, test_id))
     sequence_id = c.lastrowid
-    topic_ids_string = ','.join(map(lambda x:str(x), topic_ids))
-    c.execute('''INSERT INTO question_sequence_questions
-        (sequence_id, question_id, `order`)
-        SELECT %s, id, @order := @order + 1 AS `order` FROM
-            ( SELECT id FROM question
-            WHERE topic_id IN (''' + topic_ids_string + ''') ORDER BY RAND() LIMIT %s)
-        qs, (SELECT @order := 0) o''',
-        (sequence_id, question_count))
+    qids = list(question_ids)
+    random.shuffle(qids)
+    print qids
+    qids = qids[:question_count]
+    for index, question_id in enumerate(qids):
+        c.execute('''INSERT INTO question_sequence_questions
+            (sequence_id, question_id, `order`)
+            VALUES (%s, %s, %s);''',
+            (sequence_id, question_id, index+1))
 
 def get_topic(topic_id):
     c = get_cursor()

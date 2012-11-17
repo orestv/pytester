@@ -13,8 +13,8 @@
 				<th>Питання</th>
 				<th>Відповіді</th>
 			</tr>
-				{% for id in questions %}
-					{% set question = questions[id] %}
+				{% for question in questions %}
+					{% set id = question['id'] %}
 					{% set type = 'checkbox' if question['multiselect'] else 'radio' %}
 					<tr>
 						<td style="width: 15cm">
