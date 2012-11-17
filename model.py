@@ -86,6 +86,18 @@ def get_test_for_attempt(attempt_id):
     c = get_cursor()
     c.execute('''SELECT id FROM  test_attempt WHERE id = %s''', (attempt_id))
     return c.fetchone()
+def get_test_report(test_id):
+    c = get_cursor()
+    c.execute('''SELECT firstname, lastname,
+        MAX(result) AS result, t.questionCount AS maxResult,
+        COUNT(ta.id) AS attemptCount
+        FROM student s
+        INNER JOIN test t ON t.id = %s
+        LEFT OUTER JOIN test_attempt ta
+            ON s.id = ta.student_id AND ta.test_id = t.id
+        GROUP BY s.id;''',
+        (test_id))
+    return c.fetchall()
 
 def save_attempt(attempt_id):
     c = get_cursor()
@@ -281,6 +293,11 @@ def get_tests():
     c = get_cursor()
     c.execute('''SELECT id, name, final, questionCount FROM test''')
     return c.fetchall()
+def get_test(test_id):
+    c = get_cursor()
+    c.execute('''SELECT id, name, final, questionCount FROM test WHERE id = %s''',
+        (test_id))
+    return c.fetchone()
 def delete_test(test_id):
     c = get_cursor()
     c.execute('''DELETE t, ta, qs, qsq

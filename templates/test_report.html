@@ -1,0 +1,33 @@
+<html>
+<head>
+	<title>Звіт по тесту {{test_name}}</title>
+	<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+	<h1>Звіт по тесту {{test_name}}</h1>
+	<table>
+		<tr>
+			<th>Студент</th>
+			<th>Кращий результат</th>
+			<th>Кількість спроб</th>
+		</tr>
+		{%for result in results%}
+		<tr>
+			<td>
+				{{result['firstname']+' '+result['lastname']}}
+			</td>
+			<td>
+				{%if result['result']%}
+					{{result['result']}}/{{result['maxResult']}}
+				{%else%}
+					-
+				{%endif%}
+			</td>
+			<td>
+				{{result['attemptCount'] if result['attemptCount'] > 0 else '-'}}
+			</td>
+		</tr>
+		{%endfor%}
+	</table>
+</body>
+</html>

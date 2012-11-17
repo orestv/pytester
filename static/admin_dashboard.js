@@ -63,8 +63,9 @@ function loadStudents(students) {
 function addTestRow(test) {
 	var id = test['id'], name = test['name'],
 		final = Boolean(test['final'])
-	var tdName = $('<td>').text(name)
-	var tdFinal = $('<td>').text(test['final'] == '1' ? 'Так' : 'Ні')
+	if (test['final'] == '1')
+		name += ' <i>(підсумковий)</i>'
+	var tdName = $('<td>').html(name)
 	var tdActions = $('<td>')
 
 	var btnDelete = $('<input>')
@@ -73,13 +74,15 @@ function addTestRow(test) {
 		.on('click', function() {
 			deleteTest(id, name)
 		})
+	var aShowTestReport = $('<a>')
+		.attr('href', '/admin/test_report/'+id)
+		.text('Звіт')
 
-	tdActions.append(btnDelete)
+	tdActions.append(aShowTestReport).append(btnDelete)
 
 	$('#tblTests').find('tbody')
 		.append($('<tr>')
 			.append(tdName)
-			.append(tdFinal)
 			.append(tdActions))
 }
 function addTopicRow(topic) {
