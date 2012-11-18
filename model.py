@@ -41,7 +41,7 @@ def get_student_id(firstname, lastname):
 
 def get_students():
     c = get_cursor()
-    c.execute('''SELECT id, firstname, lastname, hash FROM student''')
+    c.execute('''SELECT id, firstname, lastname, hash FROM student ORDER BY lastname, firstname''')
     return c.fetchall()
 def get_student_info(id):
     c = get_cursor()
@@ -89,27 +89,29 @@ def get_test_for_attempt(attempt_id):
     return c.fetchone()
 def get_test_report(test_id):
     c = get_cursor()
-    c.execute('''SELECT firstname, lastname, ta.id AS attempt_id,
-        MAX(result) AS result, t.questionCount AS maxResult,
-        ta.attempt_count AS attemptCount
+    c.execute('''SELECT s.id, firstname, lastname, ta.id AS attempt_id,
+        ta.result, t.questionCount AS maxResult
         FROM student s
         INNER JOIN test t ON t.id = %s
-        LEFT OUTER JOIN (
-            SELECT id, ta_.test_id, ta_.student_id, ta_.result, tt.attempt_count FROM test_attempt ta_
-            INNER JOIN (
-                SELECT test_id, student_id, 
-                    MAX(result) AS result, COUNT(test_attempt.id) AS attempt_count
-                FROM test_attempt
-                GROUP BY test_attempt.test_id, test_attempt.student_id
-            ) tt ON ta_.test_id = tt.test_id
-                AND ta_.student_id = tt.student_id
-                AND ta_.result = tt.result
-            GROUP BY ta_.test_id, ta_.student_id, ta_.result
-        ) ta ON ta.student_id = s.id AND ta.test_id = t.id
-        GROUP BY s.id
+        LEFT OUTER JOIN test_attempt ta ON ta.test_id = t.id AND ta.student_id = s.id
         ORDER BY lastname, firstname;''',
         (test_id))
-    return c.fetchall()
+    rows = c.fetchall()
+    students = unique([(row['id'], row['firstname'], row['lastname'], row['maxResult']) for row in rows])
+    result = []
+    for student in students:
+        id, firstname, lastname, max_result = student
+        item = {'id': id, \
+            'firstname': firstname, \
+            'lastname': lastname, \
+            'maxResult': max_result}
+        attempts = filter(lambda row : row['id'] == id, rows)
+        best_attempt = sorted(attempts, key=lambda a: a['result'], reverse=True)[0]
+        item['attemptCount'] = len(filter(lambda a: a['attempt_id'], attempts))
+        item['result'] = best_attempt['result']
+        item['attempt_id'] = best_attempt['attempt_id']
+        result.append(item)
+    return result
 
 def save_attempt(attempt_id):
     c = get_cursor()
