@@ -124,7 +124,7 @@ function addTopicRow(topic) {
 }
 function addStudentRow(student) {
 	var id = student['id']
-	var name = student['firstname'] + ' ' + student['lastname']
+	var name = student['lastname'] + ' ' + student['firstname']
 	var tdName = $('<td>').append(name)
 	var tdActions = $('<td>')
 	$('#tblStudents').find('tbody')
