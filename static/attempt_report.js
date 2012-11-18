@@ -11,10 +11,12 @@ function loadQuestions(questions) {
 	$('#tblQuestions tr:gt(0)').remove()
 	var questionCount = 0
 	var correctCount = 0
+	console.log(questions)
 	for (var id in questions) {
 		if (addQuestionRow(id, questions[id]))
 			correctCount++
 		questionCount++
+		console.log(questionCount)
 	}
 	$('#spTotal').text(questionCount)
 	$('#spResult').text(correctCount)
