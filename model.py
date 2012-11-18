@@ -41,7 +41,7 @@ def get_student_id(firstname, lastname):
 
 def get_students():
     c = get_cursor()
-    c.execute('''SELECT id, firstname, lastname, hash FROM student''')
+    c.execute('''SELECT id, firstname, lastname, hash FROM student ORDER BY lastname, firstname''')
     return c.fetchall()
 def get_student_info(id):
     c = get_cursor()
