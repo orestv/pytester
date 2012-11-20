@@ -47,7 +47,7 @@ def get_student_info(id):
     c = get_cursor()
     c.execute('SELECT id, firstname, lastname, hash FROM student WHERE id = %s', (id))
     return c.fetchone()
-def get_student_test_attempts(student_id):
+def get_student_test_attempts(student_id, test_id = None):
     c = get_cursor()
     c.execute('''SELECT t.id AS test_id, t.name,
         ta.id AS attempt_id, ta.start, ta.end, CAST(ta.result AS UNSIGNED) AS result,
@@ -59,7 +59,10 @@ def get_student_test_attempts(student_id):
         WHERE ta.student_id = %s
         GROUP BY t.id, t.name, ta.id, ta.start, ta.end, ta.result, t.questionCount
         ORDER BY ta.start DESC''', (student_id))
-    return c.fetchall()
+    result = c.fetchall()
+    if test_id:
+        result = filter(lambda row : row['test_id'] == test_id, result)
+    return result
 def get_student_available_tests(student_id):
     c = get_cursor()
     c.execute('''SELECT test.id, test.name AS name,
