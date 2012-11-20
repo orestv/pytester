@@ -25,8 +25,8 @@ function addQuestionRow(id, question) {
 	var text = question['text'],
 		multiselect = question['multiselect'],
 		comment = question['comment']
-	var tdQuestion = $('<td>').text(text)
-	var tdAnswers = $('<td>')
+	var tdQuestion = $('<td>').text(text).attr('colspan', '2')
+	var tdAnswers = $('<td>').css('width', '70%')
 	var tdComment = $('<td>').text(comment != null ? comment : '')
 	var inputType = multiselect == 1 ? 'checkbox' : 'radio'
 
@@ -54,9 +54,12 @@ function addQuestionRow(id, question) {
 
 	$('#tblQuestions').find('tbody')
 		.append($('<tr>')
-			.append(tdQuestion)
+			.append(tdQuestion))
+		.append($('<tr>')
 			.append(tdAnswers)
 			.append(tdComment))
-		.append($('<tr>').append($('<td>').attr('colspan', '3').append($('<hr>'))))
+		.append($('<tr>')
+			.append($('<td>')
+				.attr('colspan', '2').append($('<hr>'))))
 	return correct;
 }

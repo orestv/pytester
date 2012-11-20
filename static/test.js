@@ -58,9 +58,11 @@ function allQuestionsAnsweredCheck() {
 }
 function answeredQuestionsMark() {
 	$('td[name=questionContainer]').each(function(index, value) {
+		var spQuestion = $(this).find('span[name=question]')
+		console.log(spQuestion)
 		if ($(this).find('input:checked').size() == 0)
-			$(this).parent().removeClass('answered')
+			spQuestion.removeClass('answered')
 		else
-			$(this).parent().addClass('answered')
+			spQuestion.addClass('answered')
 	})
 }

@@ -11,26 +11,27 @@
 		<table>
 			<tr>
 				<th>Питання</th>
-				<th>Відповіді</th>
 			</tr>
 				{% for question in questions %}
 					{% set id = question['id'] %}
 					{% set type = 'checkbox' if question['multiselect'] else 'radio' %}
 					<tr>
-						<td style="width: 15cm">
-							{{ question['text'] }}
-						</td>
 						<td name="questionContainer" id="td_$id">
+							<span name="question">{{ question['text'] }}</span>
+							<ul style="list-style-type: none;">
 							{% for ans in question['answers'] %}
+								<li>
 								{% set name = id %}
 								{% set value = ans['id'] %}
 								{% set checked = 'checked' if ans['selected'] else '' %}
-								<input type="{{type}}" id="{{value}}" name="{{name}}" value="{{value}}" {{checked}} onchange="updateAnswer({{id}});"/> <label for="{{value}}">{{ans['text']}}</label><br/>
+								<input type="{{type}}" id="{{value}}" name="{{name}}" value="{{value}}" {{checked}} onchange="updateAnswer({{id}});"/> <label for="{{value}}">{{ans['text']}}</label>
+								</li>
 							{% endfor %}
+							</ul>
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2">
+						<td>
 							<hr>
 						</td>
 					</tr>
