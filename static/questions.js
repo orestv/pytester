@@ -8,14 +8,15 @@ function reloadQuestions() {
 function loadQuestions(questions) {
 	$('#tblQuestions tr:gt(0)').remove()
 	var questionCount = 0
-	for (var id in questions) {
-		addQuestionRow(id, questions[id])
+	for (var i = 0; i < questions.length; i++) {
+		addQuestionRow(questions[i])
 		questionCount++
 	}
 	$('#spQuestionCount').text(questionCount)
 }
-function addQuestionRow(id, question) {
-	var text = question['text'],
+function addQuestionRow(question) {
+	var id = question['id'],
+		text = question['text'],
 		multiselect = question['multiselect'],
 		comment = question['comment']
 	var tdQuestion = $('<td>').text(text)
