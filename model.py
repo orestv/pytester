@@ -1,4 +1,6 @@
+# coding=utf-8
 import MySQLdb
+from DBUtils.PooledDB import PooledDB
 import ConfigParser
 import time
 import chardet
@@ -11,21 +13,16 @@ dbparams = {'host': config.get('Database', 'host'),
     'db': config.get('Database', 'db'),
     'user': config.get('Database', 'user'),
     'passwd': config.get('Database', 'passwd') }
-conn = MySQLdb.connect(host=dbparams['host'],
+db = PooledDB(MySQLdb, 5,
         db=dbparams['db'],
         user=dbparams['user'],
         passwd=dbparams['passwd'],
-        charset='utf8', use_unicode=True)
+        host=dbparams['host'],
+        use_unicode=True,
+        charset='utf8')
 
 def get_cursor():
-    try:
-        conn.ping()
-    except:
-        conn = MySQLdb.connect(host=dbparams['host'],
-            db=dbparams['db'],
-            user=dbparams['user'],
-            passwd=dbparams['passwd'],
-            charset='utf8', use_unicode=True)
+    conn = db.connection()
     return conn.cursor(MySQLdb.cursors.DictCursor)
 
 def get_student_id(firstname, lastname):
