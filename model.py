@@ -84,11 +84,15 @@ def get_student_available_tests(student_id):
 def start_new_attempt(test_id, student_id):
     c = get_cursor()
     c.execute('''INSERT into test_attempt (test_id, student_id) values (%s, %s)''', (test_id, student_id))
-    return c.lastrowid
+    attempt_id = c.lastrowid
+    test = get_test(test_id)
+    question_count = test['questionCount']
+    add_question_sequence(attempt_id, test_id, question_count)
+    return attempt_id
 
-def get_test_for_attempt(attempt_id):
+def get_attempt(attempt_id):
     c = get_cursor()
-    c.execute('''SELECT id FROM  test_attempt WHERE id = %s''', (attempt_id))
+    c.execute('''SELECT id, test_id, student_id, start, end, result FROM test_attempt WHERE id = %s''', (attempt_id))
     return c.fetchone()
 def get_test_report(test_id):
     c = get_cursor()
@@ -133,18 +137,16 @@ def get_attempt_report(attempt_id):
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, q.comment,
             a.id AS ans_id, a.text AS ans_text,
             NOT ISNULL(sa.id) AS ans_selected, a.correct AS correct
-        FROM question_sequence qs
-        INNER JOIN question_sequence_questions qsq
-            ON qs.id = qsq.sequence_id
+        FROM question_sequence_questions qsq
         INNER join question q
             ON qsq.question_id = q.id
         INNER JOIN answer a
             ON a.question_id = q.id
         INNER JOIN test_attempt ta
-            ON ta.id = %s
+            ON ta.id = qsq.attempt_id
         LEFT OUTER JOIN student_answer sa
             ON sa.test_attempt_id = ta.id AND sa.answer_id = a.id
-        WHERE qs.test_id = ta.test_id AND (qs.student_id = ta.student_id OR ISNULL(qs.student_id) = 1)
+        WHERE qsq.attempt_id = %s
         ORDER BY qsq.order ASC;''', (attempt_id))
     rows = c.fetchall()
     questions = merge_answers(rows, \
@@ -195,15 +197,12 @@ def get_question_answers(attempt_id, question_id):
 
 def get_questions_for_attempt(attempt_id):
     c = get_cursor()
-    c.execute('''SELECT q.id
-        FROM question_sequence qs
-        INNER JOIN question_sequence_questions qsq
-            ON qs.id = qsq.sequence_id
+    c.execute('''SELECT qsq.question_id AS id
+        FROM question_sequence_questions qsq
         INNER JOIN question q
             ON q.id = qsq.question_id
         INNER JOIN test_attempt ta
-            ON ta.test_id = qs.test_id
-            AND (ISNULL(qs.student_id) = 1 OR qs.student_id = ta.student_id)
+            ON qsq.attempt_id = ta.id
         WHERE ta.id = %s
         ORDER BY qsq.order ASC''',
         (attempt_id))
@@ -212,18 +211,16 @@ def get_questions_for_test(attempt_id):
     c = get_cursor()
     c.execute('''SELECT q.id AS id, q.text AS text, q.multiselect, a.id AS ans_id,
             a.text AS ans_text, NOT ISNULL(sa.id) AS ans_selected, qsq.order AS `order`
-        FROM question_sequence qs
-        INNER JOIN question_sequence_questions qsq
-            ON qs.id = qsq.sequence_id
+        FROM question_sequence_questions qsq
         INNER join question q
             ON qsq.question_id = q.id
         INNER JOIN answer a
             ON a.question_id = q.id
         INNER JOIN test_attempt ta
-            ON ta.id = %s
+            ON ta.id = qsq.attempt_id
         LEFT OUTER JOIN student_answer sa
             ON sa.test_attempt_id = ta.id AND sa.answer_id = a.id
-        WHERE qs.test_id = ta.test_id AND (qs.student_id = ta.student_id OR ISNULL(qs.student_id) = 1)
+        WHERE qsq.attempt_id = %s
         ORDER BY qsq.order ASC;''', (attempt_id))
     rows = c.fetchall()
     result = merge_answers(rows, \
@@ -332,11 +329,11 @@ def get_test(test_id):
     return c.fetchone()
 def delete_test(test_id):
     c = get_cursor()
-    c.execute('''DELETE t, ta, qs, qsq
+    c.execute('''DELETE t, ta, qsq, sa
         FROM test t
         LEFT OUTER JOIN test_attempt ta ON t.id = ta.test_id
-        LEFT OUTER JOIN question_sequence qs ON t.id = qs.test_id
-        LEFT OUTER JOIN question_sequence_questions qsq ON qs.id = qsq.sequence_id
+        LEFT OUTER JOIN student_answer sa ON t.id = sa.test_attempt_id
+        LEFT OUTER JOIN question_sequence_questions qsq ON ta.id = qsq.attempt_id
         WHERE t.id = %s''',
         (test_id))
 def rename_test(test_id, test_name):
@@ -355,31 +352,28 @@ def add_test(name, topic_ids, question_count, final):
         c.execute('''INSERT INTO test_topics (test_id, topic_id)
             VALUES (%s, %s)''',
             (test_id, topic_id))
+    return test_id
+
+def get_question_ids_for_test(test_id):
+    c = get_cursor()
+    c.execute('SELECT topic_id FROM test_topics WHERE test_id = %s', (test_id))
+    topic_ids = [topic['topic_id'] for topic in c.fetchall()]
     topic_ids_string = ','.join(map(lambda x:str(x), topic_ids))
     c.execute('SELECT id FROM question WHERE topic_id IN (' + topic_ids_string + ')')
-    question_ids = c.fetchall()
-    question_ids = [q['id'] for q in question_ids]
-    if final:
-        students = get_students()
-        for student in students:
-            add_question_sequence(student['id'], test_id, question_ids, question_count)
-    else:
-        add_question_sequence(None, test_id, question_ids, question_count)
+    question_ids = [q['id'] for q in c.fetchall()]
+    return question_ids
 
-def add_question_sequence(student_id, test_id, question_ids, question_count):
-    c = get_cursor()
-    c.execute('''INSERT INTO question_sequence (student_id, test_id)
-        VALUES (%s, %s)''', (student_id, test_id))
-    sequence_id = c.lastrowid
-    qids = list(question_ids)
+def add_question_sequence(attempt_id, test_id, question_count):
+    question_ids = get_question_ids_for_test(test_id)
+    qids = list(question_ids)       #create a copy
     random.shuffle(qids)
-    print qids
     qids = qids[:question_count]
+    c = get_cursor()
     for index, question_id in enumerate(qids):
         c.execute('''INSERT INTO question_sequence_questions
-            (sequence_id, question_id, `order`)
+            (attempt_id, question_id, `order`)
             VALUES (%s, %s, %s);''',
-            (sequence_id, question_id, index+1))
+            (attempt_id, question_id, index+1))
 
 def get_topic(topic_id):
     c = get_cursor()
