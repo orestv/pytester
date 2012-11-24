@@ -13,7 +13,7 @@ dbparams = {'host': config.get('Database', 'host'),
     'db': config.get('Database', 'db'),
     'user': config.get('Database', 'user'),
     'passwd': config.get('Database', 'passwd') }
-db = PooledDB(MySQLdb, 5,
+db = PooledDB(MySQLdb, maxconnections=4,
         db=dbparams['db'],
         user=dbparams['user'],
         passwd=dbparams['passwd'],
