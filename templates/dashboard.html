@@ -43,7 +43,7 @@
 		</tr>
 		{% for attempt in attempts %}
 			{% set progress = '{0:.3g}%'.format(attempt['answered']/attempt['question_count']*100) %}
-			{% if attempt['result'] %}
+			{% if attempt['result'] is not none %}
 				{% set result = '{0}/{1}'.format(attempt['result'], attempt['question_count']) %}
 			{% endif %}
 			<tr>

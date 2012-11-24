@@ -48,6 +48,7 @@ def test():
     if not 'test_id' in request.args:
         return redirect('/')
     test_id = request.args['test_id']
+    test = model.get_test(test_id)
     student_id = session['student_id']
     if 'continue' in request.args and 'attempt_id' in request.args:
         attempt_id = request.args.get('attempt_id')
@@ -56,7 +57,7 @@ def test():
         return redirect('/test?continue=1&test_id=%s&attempt_id=%s'%(test_id, attempt_id))
     questions = model.get_questions_for_test(attempt_id)
     return render_template('test.html',
-        test_name = 'Test name stub',
+        test_name = test['name'],
         attempt_id = attempt_id,
         questions = questions)
 @app.route('/attempt_report')
@@ -67,11 +68,13 @@ def attempt_report():
     if not 'attempt_id' in request.args:
         return redirect('/')
     attempt_id = request.args['attempt_id']
+    attempt = model.get_attempt(attempt_id)
+    test = model.get_test(attempt['test_id'])
     if is_json:
         return json.dumps(model.get_attempt_report(attempt_id))
     else:
         return render_template('attempt_report.html',
-            test_name = 'Test name stub',
+            test_name = test['name'],
             attempt_id = attempt_id)
 
 @app.route('/end_test', methods=['POST'])
